@@ -1,0 +1,2739 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect 2030 — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #F8FAFC;
+            --color-surface: #FFFFFF;
+            --color-border: #D1D5DB;
+            --color-text-primary: #0F172A;
+            --color-text-secondary: #475569;
+            --color-text-tertiary: #94A3B8;
+            --color-primary: #3B82F6;
+            --color-primary-hover: #2563EB;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-error: #EF4444;
+            --color-purple: #8B5CF6;
+            --color-cyan: #06B6D4;
+            --color-pink: #EC4899;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: var(--color-text-primary);
+            line-height: 1.3;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0.75rem 1.5rem;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 0.25rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.375rem;
+        }
+
+        .logo {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--color-cyan), var(--color-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            background: var(--color-surface);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1.5px solid var(--color-border);
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-purple));
+            box-shadow: 0 0 20px var(--glow-blue);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.25rem;
+            color: var(--color-text-primary);
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        /* Filters */
+        .filters-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.375rem;
+            flex-wrap: wrap;
+            animation: fadeIn 0.6s ease 0.1s backwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Page Tabs */
+        .page-tab {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .page-tab:hover { color: var(--color-text-primary); }
+        .page-tab.active {
+            color: var(--color-primary);
+            font-weight: 600;
+            border-bottom-color: var(--color-primary);
+        }
+
+        .filter-tag {
+            padding: 0.4rem 0.875rem;
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-tag:hover {
+            border-color: var(--color-primary);
+        }
+
+        .filter-tag.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        .filter-tag.active {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-cyan));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 20px var(--glow-blue);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.375rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .stat-card {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+            border-radius: 10px;
+            padding: 0.625rem 0.875rem;
+        }
+
+        .stat-card:hover {
+            border-color: #94A3B8;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--color-text-primary);
+        }
+
+        .stat-change {
+            font-size: 0.8125rem;
+            color: var(--color-success);
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 0.375rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Phase Groups */
+        .phases-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .phase-group {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+            border-radius: 10px;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+            padding-bottom: 0.375rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .phase-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .phase-icon.etude    { background: var(--color-primary); }
+        .phase-icon.travaux  { background: var(--color-warning); }
+        .phase-icon.cloture  { background: var(--color-success); }
+        .phase-icon.migration{ background: var(--color-purple); }
+
+        .phase-title {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .phase-progress {
+            margin-left: auto;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .jalons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .jalon-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            background: var(--color-surface);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+        }
+
+        .jalon-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--color-primary);
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .jalon-number {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            background: #F8FAFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            flex-shrink: 0;
+        }
+
+        .jalon-name {
+            flex: 1;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .jalon-count {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--color-text-primary);
+            min-width: 35px;
+            text-align: right;
+        }
+
+        .jalon-bar {
+            width: 100px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .jalon-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .jalon-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        .etude .jalon-bar-fill { background: linear-gradient(90deg, var(--color-primary), var(--color-cyan)); }
+        .travaux .jalon-bar-fill { background: linear-gradient(90deg, var(--color-warning), #FBBF24); }
+        .cloture .jalon-bar-fill { background: linear-gradient(90deg, var(--color-success), #34D399); }
+        .migration .jalon-bar-fill { background: linear-gradient(90deg, var(--color-purple), var(--color-pink)); }
+
+        /* Summary Panel */
+        .summary-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .summary-card {
+            background: var(--color-surface);
+            backdrop-filter: blur(20px);
+            border: 1.5px solid var(--color-border);
+            border-radius: 16px;
+            padding: 0.5rem;
+            animation: fadeInUp 0.6s ease 0.5s backwards;
+        }
+
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.01em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 240px;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-rings {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .progress-ring-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-ring-label {
+            flex: 1;
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .progress-ring-bar {
+            flex: 2;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-ring-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-ring-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .progress-ring-value {
+            font-weight: 700;
+            font-size: 0.875rem;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .etude .progress-ring-fill { background: linear-gradient(90deg, var(--color-primary), var(--color-cyan)); }
+        .travaux .progress-ring-fill { background: linear-gradient(90deg, var(--color-warning), #FBBF24); }
+        .cloture .progress-ring-fill { background: linear-gradient(90deg, var(--color-success), #34D399); }
+        .migration .progress-ring-fill { background: linear-gradient(90deg, var(--color-purple), var(--color-pink)); }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.375rem;
+            animation: fadeIn 0.6s ease 0.2s backwards;
+        }
+
+        .btn {
+            padding: 0.4rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover { background: #2563EB; }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 1.5px solid var(--color-border);
+        }
+
+        .btn-secondary:hover { border-color: #94A3B8; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            max-width: 900px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Multi-select filter dropdown */
+        .ms-wrapper { position: relative; display: inline-block; }
+        .ms-btn {
+            padding: 0.4rem 0.75rem; border: 1.5px solid var(--color-border);
+            border-radius: 6px; font-family: inherit; font-size: 0.8125rem;
+            background: var(--color-surface); color: var(--color-text-primary);
+            cursor: pointer; display: flex; align-items: center; gap: 0.375rem;
+            white-space: nowrap; min-width: 140px; justify-content: space-between;
+        }
+        .ms-btn.has-selection { border-color: var(--color-primary); color: var(--color-primary); background: rgba(59,130,246,0.05); }
+        .ms-dropdown {
+            display: none; position: absolute; top: 100%; left: 0; z-index: 200;
+            background: var(--color-surface); border: 1.5px solid var(--color-border);
+            border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            min-width: 200px; max-height: 240px; overflow-y: auto; margin-top: 4px;
+        }
+        .ms-dropdown.open { display: block; }
+        .ms-option {
+            padding: 0.5rem 0.875rem; font-size: 0.8125rem; cursor: pointer;
+            display: flex; align-items: center; gap: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .ms-option:last-child { border-bottom: none; }
+        .ms-option:hover { background: var(--color-bg); }
+        .ms-option input[type=checkbox] { cursor: pointer; accent-color: var(--color-primary); }
+        .ms-option.select-all { font-weight: 600; color: var(--color-text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Segment search in modal */
+        .segment-search-bar {
+            padding: 0.5rem 0.75rem; border: 1.5px solid var(--color-border);
+            border-radius: 6px; font-family: inherit; font-size: 0.875rem;
+            width: 100%; color: var(--color-text-primary); background: var(--color-surface);
+            margin-bottom: 0.75rem;
+        }
+
+        /* "Tous" option in topo dropdown */
+        .topo-tous {
+            padding: 0.75rem 1.25rem; font-size: 0.875rem; cursor: pointer;
+            border-bottom: 2px solid var(--color-border); font-weight: 700;
+            color: var(--color-primary); background: rgba(59,130,246,0.04);
+        }
+
+        /* Close btn simplifié */
+        .close-btn {
+            width: 32px; height: 32px; border-radius: 6px;
+            background: var(--color-surface); border: 1.5px solid var(--color-border);
+            cursor: pointer; font-size: 1.125rem; color: var(--color-text-secondary);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .close-btn:hover { background: var(--color-bg); }
+            color: white;
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 20px var(--glow-blue);
+        }
+
+        .segments-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .segment-card {
+            padding: 0.5rem;
+            background: var(--color-surface);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1.5px solid var(--color-border);
+        }
+
+        .segment-card:hover {
+            border-color: var(--color-primary);
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px var(--glow-blue);
+        }
+
+        .segment-info {
+            flex: 1;
+        }
+
+        .segment-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 0.25rem;
+        }
+
+        .segment-meta {
+            font-size: 0.8125rem;
+            color: var(--color-text-secondary);
+        }
+
+        .segment-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Form inputs */
+        input[type="text"],
+        input[type="date"],
+        input[type="checkbox"],
+        select {
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2.5rem;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--color-primary);
+        }
+
+        /* Tabs */
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            padding: 0.5rem 1rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: var(--color-text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Navigation Header -->
+    <div style="position: relative; z-index: 10; background: var(--color-surface); backdrop-filter: blur(20px); border-bottom: 1.5px solid var(--color-border); padding: 0.625rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="font-size: 1rem; font-weight: 700; color: var(--color-primary); font-family: 'Inter', sans-serif;">Collect 2030</div>
+            <div id="piloteNavButton" style="display: none;">
+                <a href="pilote.html" style="padding: 0.5rem 1rem; background: var(--color-surface); border: 1.5px solid var(--color-border); color: var(--color-text-secondary); border-radius: 8px; text-decoration: none; font-size: 0.875rem; font-weight: 600; transition: all 0.2s ease;">🎯 Vue Pilote</a>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--color-surface); border-radius: 12px; border: 1.5px solid var(--color-border); font-size: 0.875rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-purple)); flex-shrink: 0;"></div>
+                <div style="display: flex; flex-direction: column; line-height: 1.3;">
+                    <span id="userName" style="font-weight: 600; color: var(--color-text-primary); font-size: 0.875rem;">Jean Dupont</span>
+                    <span id="userRole" style="font-size: 0.75rem; color: var(--color-text-tertiary); font-weight: 400;">Chef de Projet</span>
+                </div>
+            </div>
+            <button onclick="logout()" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1.5px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #EF4444; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+                Déconnexion
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <div class="header-top">
+            </div>
+            <h1>Tableau de bord</h1>
+        </header>
+
+        <div class="filters-bar" style="position: relative;">
+            <div style="position: relative; display: inline-block;">
+                <div class="filter-tag active" id="topoFilterBtn" onclick="toggleTopoDropdown()" style="cursor: pointer; user-select: none;">
+                    <span id="topoFilterLabel">Topologie</span> ▾
+                </div>
+                <div id="topoDropdown" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); min-width: 240px; z-index: 9999; overflow: hidden;">
+                    <div id="topoDropdownList" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            <div id="filterLots" class="filter-tag" style="display:none;">Tous les lots</div>
+            <div id="filterLiaisons" class="filter-tag" style="display:none;">Toutes les liaisons</div>
+            <div id="filterSecteurs" class="filter-tag" style="display:none;">Tous les secteurs</div>
+        </div>
+
+
+        <!-- Barre d'actions -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <div style="display:flex; gap:0.5rem;">
+                <button id="createProjectBtn" onclick="openCreateProjectModal()"
+                    style="padding:0.4rem 0.875rem; border-radius:6px; font-size:0.8125rem; font-weight:600; cursor:pointer; border:1.5px solid var(--color-primary); background:var(--color-primary); color:white; font-family:inherit; transition:background 0.2s;"
+                    onmouseover="this.style.background='var(--color-primary-hover)'" onmouseout="this.style.background='var(--color-primary)'">
+                    + Créer un projet
+                </button>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                <button id="allSegmentsBtn" class="btn btn-secondary" style="display:none;" onclick="openModalFiltered(null)">📦 Tous les segments</button>
+                <button id="simulerBtn" class="btn btn-secondary" style="display:none;" onclick="simulateProgress()">⚡ Simuler</button>
+                <button class="btn btn-secondary" id="importBtn" style="display:none;" onclick="openImportModal()">📥 Importer Excel</button>
+                <button id="viderTopoBtn" style="display:none; padding:0.5rem 1rem; border-radius:8px; font-size:0.875rem; font-weight:600; cursor:pointer; border:1.5px solid rgba(239,68,68,0.3); background:rgba(239,68,68,0.08); color:#DC2626; font-family:inherit; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.15)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'" onclick="viderTopologie()">🗑 Vider</button>
+                <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleFileImport(event)">
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid" style="margin-bottom:0.5rem;"></div>
+
+        <!-- Navigation onglets (visible seulement si topo sélectionnée) -->
+        <div id="pageTabsBar" style="display:none; border-bottom:2px solid var(--color-border); margin-bottom:0.75rem;">
+            <div style="display:flex; gap:0;">
+                <button class="page-tab active" id="tab-dashboard" onclick="switchPageTab('dashboard')">📊 Tableau de bord</button>
+                <button class="page-tab" id="tab-infos"     onclick="switchPageTab('infos')">ℹ️ Informations</button>
+                <button class="page-tab" id="tab-liaisons"  onclick="switchPageTab('liaisons')">🔗 Liaisons</button>
+                <button class="page-tab" id="tab-segments"  onclick="switchPageTab('segments')">📋 Segments</button>
+                <button class="page-tab" id="tab-heb"       onclick="switchPageTab('heb')">🏢 Hébergements</button>
+            </div>
+        </div>
+
+        <!-- Onglet : Tableau de bord -->
+        <div id="pageContent-dashboard">
+            <div class="main-grid">
+                <div class="phases-container" id="phasesContainer"></div>
+                <div class="summary-panel">
+                    <div class="summary-card">
+                        <div class="summary-title">Avancement global</div>
+                        <div class="chart-container"><canvas id="progressChart"></canvas></div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">Progression par phase</div>
+                        <div class="progress-rings">
+                            <div class="progress-ring-item etude">
+                                <div class="progress-ring-label">Étude</div>
+                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-etude" style="width:0%"></div></div>
+                                <div class="progress-ring-value" id="ring-etude-val">0%</div>
+                            </div>
+                            <div class="progress-ring-item travaux">
+                                <div class="progress-ring-label">Travaux</div>
+                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-travaux" style="width:0%"></div></div>
+                                <div class="progress-ring-value" id="ring-travaux-val">0%</div>
+                            </div>
+                            <div class="progress-ring-item cloture">
+                                <div class="progress-ring-label">Clôture</div>
+                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-cloture" style="width:0%"></div></div>
+                                <div class="progress-ring-value" id="ring-cloture-val">0%</div>
+                            </div>
+                            <div class="progress-ring-item migration">
+                                <div class="progress-ring-label">Migration</div>
+                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-migration" style="width:0%"></div></div>
+                                <div class="progress-ring-value" id="ring-migration-val">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet : Informations générales -->
+        <div id="pageContent-infos" style="display:none; padding-top:1rem;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; max-width:900px;">
+                <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem;">
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Topologie</div>
+                    <div id="infoTopoName" style="font-size:1rem; font-weight:700; color:var(--color-text-primary); font-family:'Courier New',monospace;">—</div>
+                </div>
+                <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem;">
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">LOT</div>
+                    <div id="infoTopoLot" style="font-size:1rem; font-weight:700; color:var(--color-text-primary);">—</div>
+                </div>
+                <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem; grid-column:1/-1;">
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.875rem;">Statut des données</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div style="background:var(--color-bg); border:1.5px solid var(--color-border); border-radius:8px; padding:0.875rem; display:flex; align-items:center; gap:0.75rem;">
+                            <div style="font-size:1.25rem;">🔗</div>
+                            <div>
+                                <div style="font-size:0.8125rem; font-weight:600; color:var(--color-text-secondary); margin-bottom:0.25rem;">Liaisons</div>
+                                <div id="infoHasLiaisons" style="font-size:0.8125rem; font-weight:600;">—</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--color-bg); border:1.5px solid var(--color-border); border-radius:8px; padding:0.875rem; display:flex; align-items:center; gap:0.75rem;">
+                            <div style="font-size:1.25rem;">📋</div>
+                            <div>
+                                <div style="font-size:0.8125rem; font-weight:600; color:var(--color-text-secondary); margin-bottom:0.25rem;">Segments</div>
+                                <div id="infoHasSegments" style="font-size:0.8125rem; font-weight:600;">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="infoCdpSection" style="display:none; background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem; grid-column:1/-1;">
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.875rem;">Chef de Projet</div>
+                    <div style="background:var(--color-bg); border:1.5px solid var(--color-border); border-radius:8px; padding:0.875rem; display:flex; align-items:center; gap:0.75rem; margin-bottom:0.875rem;">
+                        <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#3B82F6,#8B5CF6); flex-shrink:0;"></div>
+                        <div>
+                            <div style="font-size:0.75rem; color:var(--color-text-tertiary); margin-bottom:0.125rem;">Actuellement assigné</div>
+                            <div id="infoCdpCurrent" style="font-size:0.9375rem; font-weight:600; color:var(--color-text-primary);">Non affecté</div>
+                        </div>
+                    </div>
+                    <div id="infoCdpWarning" style="display:none; padding:0.625rem 0.875rem; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:6px; font-size:0.8125rem; color:#D97706; margin-bottom:0.875rem;">⚠️ Un LOT doit être défini avant d'affecter un CDP.</div>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <select id="infoCdpSelect" style="flex:1; padding:0.5rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.875rem; background:var(--color-surface); color:var(--color-text-primary);">
+                            <option value="">Sélectionner un CDP</option>
+                        </select>
+                        <button onclick="saveAffectationFromModal()" style="padding:0.5rem 1rem; background:var(--color-primary); border:none; border-radius:6px; color:white; font-size:0.875rem; font-weight:600; cursor:pointer; font-family:inherit;" onmouseover="this.style.background='#2563EB'" onmouseout="this.style.background='var(--color-primary)'">Affecter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet : Liaisons -->
+        <div id="pageContent-liaisons" style="display:none; padding-top:0.75rem;">
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
+                <input id="liaisonSearch" type="text" placeholder="🔍 Rechercher par Ref Liaison..."
+                    oninput="filterLiaisonsTable()"
+                    style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:240px; color:var(--color-text-primary); background:var(--color-surface);">
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-lref" onclick="toggleMs('ms-lref')">Ref Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-lref">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-lref','filterLiaisonsTable')"><input type="checkbox" id="ms-lref-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-ltype" onclick="toggleMs('ms-ltype')">Type Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-ltype">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-ltype','filterLiaisonsTable')"><input type="checkbox" id="ms-ltype-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-lcode" onclick="toggleMs('ms-lcode')">Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-lcode">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-lcode','filterLiaisonsTable')"><input type="checkbox" id="ms-lcode-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <button onclick="resetLiaisonFilters()" style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
+                <span id="liaisonsCount" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-left:auto;">0 liaison</span>
+            </div>
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
+                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
+                        <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Segments</th>
+                    </tr></thead>
+                    <tbody id="liaisonsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Segments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liaisonsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Onglet : Segments -->
+        <!-- Onglet : Segments -->
+        <div id="pageContent-segments" style="display:none; padding-top:0.75rem;">
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
+                <input id="segmentSearch" type="text" placeholder="🔍 Ref Liaison ou Nom Segment..."
+                    oninput="filterSegmentsTable()"
+                    style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:260px; color:var(--color-text-primary); background:var(--color-surface);">
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-sref" onclick="toggleMs('ms-sref')">Ref Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-sref">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sref','filterSegmentsTable')"><input type="checkbox" id="ms-sref-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-stype" onclick="toggleMs('ms-stype')">Type Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-stype">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-stype','filterSegmentsTable')"><input type="checkbox" id="ms-stype-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-sliaison" onclick="toggleMs('ms-sliaison')">Liaison <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-sliaison">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sliaison','filterSegmentsTable')"><input type="checkbox" id="ms-sliaison-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-sfourn" onclick="toggleMs('ms-sfourn')">Fournisseur <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-sfourn">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sfourn','filterSegmentsTable')"><input type="checkbox" id="ms-sfourn-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <div class="ms-wrapper">
+                    <button class="ms-btn" id="ms-btn-smux" onclick="toggleMs('ms-smux')">Mux <span>▾</span></button>
+                    <div class="ms-dropdown" id="ms-smux">
+                        <div class="ms-option select-all" onclick="toggleMsAll('ms-smux','filterSegmentsTable')"><input type="checkbox" id="ms-smux-all" checked> Tout sélectionner</div>
+                    </div>
+                </div>
+                <button onclick="resetSegmentFilters()" style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
+                <span id="segmentsCount" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-left:auto;">0 segment</span>
+            </div>
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Nom Segment</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Fournisseur</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineType</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleType</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Nb FO</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Longueur (ml)</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Mux</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Couleur</th>
+                        </tr>
+                    </thead>
+                    <tbody id="segmentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+
+                <!-- Onglet : Hébergements -->
+        <div id="pageContent-heb" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <div style="font-size:0.9375rem; color:var(--color-text-secondary);">
+                    <strong id="hebCount" style="color:var(--color-text-primary);">0 hébergement</strong> pour cette topologie
+                </div>
+                <button id="hebSaveBtn" class="btn btn-primary" style="display:none;" onclick="saveHebergements()">💾 Enregistrer les modifications</button>
+            </div>
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding:0.625rem 0.5rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Actions</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">TOPOLOGIE</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ID42C</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Site CO IR</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Zone CO</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type de Salle</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">LOT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hebTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    <!-- Modal Segments -->
+    <div id="segmentsModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <div class="modal-title" id="segmentsModalTitle">Gestion des segments</div>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div style="margin-bottom:0.5rem; padding:0.5rem 0.75rem; background:rgba(59,130,246,0.08); border:1.5px solid var(--color-primary); border-radius:8px; font-size:0.875rem; color:var(--color-text-primary);">
+                💡 <strong>Changez le statut</strong> en sélectionnant un jalon dans le menu déroulant
+            </div>
+            <input id="segmentModalSearch" type="text" placeholder="🔍 Rechercher par nom de segment..."
+                oninput="filterSegmentModal()"
+                style="width:100%; padding:0.5rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.875rem; color:var(--color-text-primary); background:var(--color-surface); margin-bottom:0.75rem; box-sizing:border-box;">
+            <div class="segments-grid" id="segmentsList"></div>
+        </div>
+    </div>
+
+    <!-- Modal Hébergement actions -->
+    <div id="hebModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:flex-start; justify-content:center; padding:2rem; overflow-y:auto;">
+        <div style="background:var(--color-surface); border-radius:12px; max-width:700px; width:100%; box-shadow:0 8px 25px rgba(0,0,0,0.15); margin:auto;">
+            <div style="padding:1.25rem 1.5rem; border-bottom:1.5px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="font-size:1rem; font-weight:700;">Actions hébergement</h3>
+                    <p id="hebModalTitle" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-top:0.125rem;">—</p>
+                </div>
+                <button onclick="closeHebModal()" class="close-btn">×</button>
+            </div>
+            <div id="hebModalBody" style="padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:0.75rem;"></div>
+            <div style="padding:1.25rem 1.5rem; border-top:1.5px solid var(--color-border); display:flex; justify-content:flex-end; gap:0.5rem;">
+                <button onclick="closeHebModal()" class="btn btn-secondary">Annuler</button>
+                <button onclick="saveHebActions()" class="btn btn-primary">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import -->
+    <div id="importModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:2rem;">
+        <div style="background:var(--color-surface); border-radius:16px; max-width:560px; width:100%; box-shadow:0 20px 25px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto;">
+            <div style="padding:1.5rem; border-bottom:1.5px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="font-size:1.125rem; font-weight:700;">Importer des données</h3>
+                    <p style="font-size:0.875rem; color:var(--color-text-secondary); margin-top:0.25rem;">Choisissez le type d'import et la topologie cible</p>
+                </div>
+                <button onclick="closeImportModal()" style="width:32px;height:32px;border-radius:6px;border:1.5px solid var(--color-border);background:var(--color-surface);cursor:pointer;font-size:1.25rem;">×</button>
+            </div>
+
+            <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;">
+
+                <!-- Type d'import -->
+                <div>
+                    <label style="display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;">Type d'import <span style="color:var(--color-error);">*</span></label>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div id="importTypeLS" onclick="selectImportType('ls')"
+                             style="padding:1rem; border:2px solid var(--color-primary); border-radius:10px; cursor:pointer; background:rgba(59,130,246,0.05); transition:all 0.2s;">
+                            <div style="font-size:1.25rem; margin-bottom:0.375rem;">🔗</div>
+                            <div style="font-size:0.875rem; font-weight:700; color:var(--color-text-primary); margin-bottom:0.25rem;">Liaisons + Segments</div>
+                            <div style="font-size:0.75rem; color:var(--color-text-secondary);">Onglets Liaisons et Segments</div>
+                        </div>
+                        <div id="importTypeHEB" onclick="selectImportType('heb')"
+                             style="padding:1rem; border:2px solid var(--color-border); border-radius:10px; cursor:pointer; background:var(--color-surface); transition:all 0.2s;">
+                            <div style="font-size:1.25rem; margin-bottom:0.375rem;">🏢</div>
+                            <div style="font-size:0.875rem; font-weight:700; color:var(--color-text-primary); margin-bottom:0.25rem;">Hébergements</div>
+                            <div style="font-size:0.75rem; color:var(--color-text-secondary);">Fichier 6 colonnes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topologie (toujours visible) -->
+                <div>
+                    <label style="display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.5rem;">Topologie <span style="color:var(--color-error);">*</span></label>
+                    <select id="importTopoSelect" style="width:100%;padding:0.75rem;border:1.5px solid var(--color-border);border-radius:8px;font-family:inherit;font-size:0.9375rem;color:var(--color-text-primary);background:var(--color-surface);">
+                        <option value="">Sélectionner une topologie</option>
+                    </select>
+                    <p id="noTopoWarning" style="display:none; margin-top:0.5rem; font-size:0.8125rem; color:var(--color-error);">
+                        ⚠️ Aucune topologie disponible. Le Pilote doit d'abord en créer une.
+                    </p>
+                </div>
+
+                <!-- LOT (uniquement Liaisons+Segments) -->
+                <div id="importLotSection">
+                    <label style="display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.5rem;">Numéro de LOT <span style="color:var(--color-error);">*</span></label>
+                    <input id="importLotInput" type="number" min="1" max="99" placeholder="Ex: 3"
+                        style="width:100%;padding:0.75rem;border:1.5px solid var(--color-border);border-radius:8px;font-family:inherit;font-size:0.9375rem;color:var(--color-text-primary);">
+                    <p style="margin-top:0.375rem; font-size:0.8125rem; color:var(--color-text-tertiary);">Requis pour l'affectation à un Chef de Projet.</p>
+                </div>
+
+                <!-- Colonnes attendues Hébergements -->
+                <div id="importHebInfo" style="display:none; background:#F8FAFC; border:1.5px solid var(--color-border); border-radius:8px; padding:0.875rem;">
+                    <div style="font-size:0.8125rem; font-weight:600; color:var(--color-text-primary); margin-bottom:0.5rem;">📋 Colonnes attendues :</div>
+                    <div style="font-size:0.8125rem; color:var(--color-text-secondary); line-height:1.8;">
+                        <span style="font-weight:600;">A</span> TOPOLOGIE &nbsp;|&nbsp;
+                        <span style="font-weight:600;">B</span> ID42C &nbsp;|&nbsp;
+                        <span style="font-weight:600;">C</span> Site CO IR &nbsp;|&nbsp;
+                        <span style="font-weight:600;">D</span> Type <span style="color:#D97706;">(CO, Super CO)</span><br>
+                        <span style="font-weight:600;">E</span> Zone CO <span style="color:#D97706;">(RIP, ZTD-AMII, ZMD RIP)</span> &nbsp;|&nbsp;
+                        <span style="font-weight:600;">F</span> Type de Salle <span style="color:#D97706;">(Armoire extérieure, Salle HEP, Salle Orange)</span>
+                    </div>
+                </div>
+
+                <!-- Fichier -->
+                <div>
+                    <label style="display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.5rem;">Fichier Excel (.xlsx) <span style="color:var(--color-error);">*</span></label>
+                    <div onclick="document.getElementById('importFileInput').click()"
+                         style="width:100%;padding:1rem;border:2px dashed var(--color-border);border-radius:8px;text-align:center;cursor:pointer;color:var(--color-text-secondary);transition:all 0.2s;"
+                         onmouseover="this.style.borderColor='var(--color-primary)';this.style.color='var(--color-primary)'"
+                         onmouseout="this.style.borderColor='var(--color-border)';this.style.color='var(--color-text-secondary)'">
+                        <div style="font-size:1.5rem;margin-bottom:0.375rem;">📂</div>
+                        <div id="importFileName" style="font-size:0.875rem;font-weight:500;">Cliquez pour choisir un fichier</div>
+                        <div id="importFileHint" style="font-size:0.8125rem;margin-top:0.25rem;">Fichier avec onglets Liaisons et Segments</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="padding:1.5rem;border-top:1.5px solid var(--color-border);display:flex;gap:0.75rem;justify-content:flex-end;">
+                <button onclick="closeImportModal()" class="btn btn-secondary">Annuler</button>
+                <button onclick="triggerFileInput()" class="btn btn-primary" id="importConfirmBtn">Choisir le fichier et importer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Création Projet -->
+    <div id="createProjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Créer un nouveau projet</div>
+                <button class="close-btn" onclick="closeCreateProjectModal()">×</button>
+            </div>
+            
+            <form id="projectForm" onsubmit="createProject(event)">
+                <div style="margin-bottom: 0.375rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem; color: var(--color-text-secondary);">Nom du projet</label>
+                    <input type="text" id="projectName" required 
+                           style="width: 100%; padding: 0.5rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 10px; color: var(--color-text-primary); font-family: inherit; font-size: 0.9375rem;"
+                           placeholder="Ex: Déploiement Phase 1">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.375rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem; color: var(--color-text-secondary);">Chef de Travaux (CDT)</label>
+                        <select id="projectCDT" required
+                                style="width: 100%; padding: 0.5rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 10px; color: var(--color-text-primary); font-family: inherit; font-size: 0.9375rem;">
+                            <option value="">Sélectionner</option>
+                            <option value="Marie Martin">Marie Martin</option>
+                            <option value="Pierre Durand">Pierre Durand</option>
+                            <option value="Sophie Bernard">Sophie Bernard</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; font-size: 0.875rem; color: var(--color-text-secondary);">Entreprise externe</label>
+                        <select id="projectCompany" required
+                                style="width: 100%; padding: 0.5rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 10px; color: var(--color-text-primary); font-family: inherit; font-size: 0.9375rem;">
+                            <option value="">Sélectionner</option>
+                            <option value="Circet">Circet</option>
+                            <option value="Scopelec">Scopelec</option>
+                            <option value="Axione">Axione</option>
+                            <option value="SPIE">SPIE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 0.375rem;">
+                    <label style="display: block; margin-bottom: 0.375rem; font-weight: 600; font-size: 0.875rem; color: var(--color-text-secondary);">
+                        Sélectionner les segments (<span id="selectedCount">0</span> sélectionné(s))
+                    </label>
+                    <div id="availableSegmentsList" style="max-height: 300px; overflow-y: auto; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 10px; padding: 0.5rem;"></div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateProjectModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer le projet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        const allSegments = [];
+
+        // Lire les états depuis localStorage (gérés par l'Admin)
+        function loadEtats() {
+            const saved = localStorage.getItem('collect2030_etats');
+            if (saved) return JSON.parse(saved);
+            // États par défaut si l'admin n'a pas encore configuré
+            return [
+                { id: 0,  name: 'Non démarré',               phase: 'etude' },
+                { id: 1,  name: 'Design',                    phase: 'etude' },
+                { id: 2,  name: 'Delivery Free',             phase: 'etude' },
+                { id: 3,  name: 'Delivery Orange',           phase: 'etude' },
+                { id: 4,  name: 'Commande ferme',            phase: 'etude' },
+                { id: 5,  name: 'Plans',                     phase: 'travaux' },
+                { id: 6,  name: 'Étude terrain',             phase: 'travaux' },
+                { id: 7,  name: 'Travaux',                   phase: 'travaux' },
+                { id: 8,  name: 'Validation fin de travaux', phase: 'travaux' },
+                { id: 9,  name: 'Intégration en base',       phase: 'cloture' },
+                { id: 10, name: 'Mise en service',           phase: 'cloture' },
+                { id: 11, name: 'Migration',                 phase: 'migration' }
+            ];
+        }
+
+        const PHASE_COLORS = {
+            etude:     { bg: 'rgba(59,130,246,0.3)',   text: '#3B82F6' },
+            travaux:   { bg: 'rgba(245,158,11,0.3)',   text: '#F59E0B' },
+            cloture:   { bg: 'rgba(16,185,129,0.3)',   text: '#10B981' },
+            migration: { bg: 'rgba(139,92,246,0.3)',   text: '#8B5CF6' }
+        };
+
+        function getStatusNames() { return loadEtats().map(e => e.name); }
+        function getStatusColors() { return loadEtats().map(e => PHASE_COLORS[e.phase].bg); }
+        function getStatusTextColors() { return loadEtats().map(e => PHASE_COLORS[e.phase].text); }
+
+        let chart = null;
+        let projects = [];
+        let selectedSegments = new Set();
+        let topologies = [];
+
+        const liaisons = [];
+
+        // ── MULTI-SELECT HELPERS ─────────────────────────────────────────
+        function toggleMs(id) {
+            document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+                if (d.id !== id) d.classList.remove('open');
+            });
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        function toggleMsAll(dropId, callback) {
+            const drop = document.getElementById(dropId);
+            const allCb = drop.querySelector('input[type=checkbox]');
+            const checked = allCb.checked;
+            drop.querySelectorAll('.ms-option:not(.select-all) input[type=checkbox]').forEach(cb => cb.checked = checked);
+            updateMsBtn(dropId);
+            window[callback]();
+        }
+
+        function getMsSelected(dropId) {
+            const drop = document.getElementById(dropId);
+            if (!drop) return null; // null = pas de filtre
+            const allCbs = drop.querySelectorAll('.ms-option:not(.select-all) input[type=checkbox]');
+            if (allCbs.length === 0) return null;
+            const checked = [...allCbs].filter(cb => cb.checked).map(cb => cb.value);
+            // Si tout coché = pas de filtre
+            if (checked.length === allCbs.length) return null;
+            return checked;
+        }
+
+        function updateMsBtn(dropId) {
+            const sel = getMsSelected(dropId);
+            const btnId = 'ms-btn-' + dropId.replace('ms-', '');
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            const labels = { 'ms-lref':'Ref Liaison','ms-ltype':'Type Liaison','ms-lcode':'Liaison',
+                             'ms-sref':'Ref Liaison','ms-stype':'Type Liaison','ms-sliaison':'Liaison',
+                             'ms-sfourn':'Fournisseur','ms-smux':'Mux' };
+            const label = labels[dropId] || dropId;
+            if (sel && sel.length > 0) {
+                btn.classList.add('has-selection');
+                btn.innerHTML = `${label} (${sel.length}) <span>▾</span>`;
+            } else {
+                btn.classList.remove('has-selection');
+                btn.innerHTML = `${label} <span>▾</span>`;
+            }
+        }
+
+        function populateMsDropdown(dropId, values, callback) {
+            const drop = document.getElementById(dropId);
+            if (!drop) return;
+            const existing = [...drop.querySelectorAll('.ms-option:not(.select-all)')].map(o => o.querySelector('input').value);
+            if (JSON.stringify(existing) === JSON.stringify(values)) return; // pas de changement
+            // Garder seulement le select-all, reconstruire les options
+            const allRow = drop.querySelector('.select-all');
+            drop.innerHTML = '';
+            drop.appendChild(allRow);
+            values.forEach(v => {
+                const div = document.createElement('div');
+                div.className = 'ms-option';
+                div.innerHTML = `<input type="checkbox" value="${v.replace(/"/g,'&quot;')}" checked onchange="updateMsBtn('${dropId}');${callback}()"> ${v}`;
+                drop.appendChild(div);
+            });
+        }
+
+        // Fermer dropdowns multi-select si clic dehors
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.ms-wrapper')) {
+                document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+            }
+        });
+
+        // ── FILTRES LIAISONS ─────────────────────────────────────────────
+        function populateLiaisonFilters() {
+            const unique = arr => [...new Set(arr.filter(Boolean))].sort();
+            populateMsDropdown('ms-lref',  unique(liaisons.map(l => l.refLiaison)), 'filterLiaisonsTable');
+            populateMsDropdown('ms-ltype', unique(liaisons.map(l => l.type)),       'filterLiaisonsTable');
+            populateMsDropdown('ms-lcode', unique(liaisons.map(l => l.code)),       'filterLiaisonsTable');
+        }
+
+        function filterLiaisonsTable() {
+            const search = (document.getElementById('liaisonSearch')?.value || '').toLowerCase();
+            const fRef   = getMsSelected('ms-lref');
+            const fType  = getMsSelected('ms-ltype');
+            const fCode  = getMsSelected('ms-lcode');
+
+            const filtered = liaisons.filter(l =>
+                (!search || (l.refLiaison||'').toLowerCase().includes(search)) &&
+                (!fRef   || fRef.includes(l.refLiaison||'')) &&
+                (!fType  || fType.includes(l.type||'')) &&
+                (!fCode  || fCode.includes(l.code||''))
+            );
+
+            const tbody = document.getElementById('liaisonsTableBody');
+            const countEl = document.getElementById('liaisonsCount');
+            if (countEl) countEl.textContent = `${filtered.length} liaison${filtered.length > 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--color-text-tertiary);">
+                    ${liaisons.length === 0 ? '<div style="font-size:1.5rem;margin-bottom:0.5rem;">📭</div>Aucune liaison importée' : 'Aucun résultat pour ces filtres'}
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(l => `
+                <tr onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background=''">
+                    <td style="${TDS}">${l.refLiaison||'—'}</td>
+                    <td style="${TD}">${l.type||'—'}</td>
+                    <td style="${TD}">${badge(l.code)}</td>
+                    <td style="${TD}">${badge(l.extOrigineCode)}</td>
+                    <td style="${TD}">${badge(l.typeA)}</td>
+                    <td style="${TD}">${badge(l.extCibleCode)}</td>
+                    <td style="${TD}">${badge(l.typeB)}</td>
+                    <td style="${TD} text-align:center; font-weight:700;">${l.count??'—'}</td>
+                </tr>`).join('');
+        }
+
+        function resetLiaisonFilters() {
+            document.getElementById('liaisonSearch').value = '';
+            ['ms-lref','ms-ltype','ms-lcode'].forEach(id => {
+                const drop = document.getElementById(id);
+                if (drop) drop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = true);
+                updateMsBtn(id);
+            });
+            filterLiaisonsTable();
+        }
+
+        function renderLiaisonsTable() {
+            populateLiaisonFilters();
+            filterLiaisonsTable();
+        }
+
+        // ── FILTRES SEGMENTS ─────────────────────────────────────────────
+        function populateSegmentFilters() {
+            const unique = arr => [...new Set(arr.filter(Boolean))].sort();
+            populateMsDropdown('ms-sref',     unique(allSegments.map(s => s.refLiaison)),  'filterSegmentsTable');
+            populateMsDropdown('ms-stype',    unique(allSegments.map(s => s.typeLiaison)), 'filterSegmentsTable');
+            populateMsDropdown('ms-sliaison', unique(allSegments.map(s => s.liaison)),     'filterSegmentsTable');
+            populateMsDropdown('ms-sfourn',   unique(allSegments.map(s => s.fournisseur)), 'filterSegmentsTable');
+            populateMsDropdown('ms-smux',     unique(allSegments.map(s => s.mux)),         'filterSegmentsTable');
+        }
+
+        function filterSegmentsTable() {
+            const search   = (document.getElementById('segmentSearch')?.value||'').toLowerCase();
+            const fRef     = getMsSelected('ms-sref');
+            const fType    = getMsSelected('ms-stype');
+            const fLiaison = getMsSelected('ms-sliaison');
+            const fFourn   = getMsSelected('ms-sfourn');
+            const fMux     = getMsSelected('ms-smux');
+
+            const filtered = allSegments.filter(s =>
+                (!search   || (s.refLiaison||'').toLowerCase().includes(search) || (s.nomSegment||'').toLowerCase().includes(search)) &&
+                (!fRef     || fRef.includes(s.refLiaison||'')) &&
+                (!fType    || fType.includes(s.typeLiaison||'')) &&
+                (!fLiaison || fLiaison.includes(s.liaison||'')) &&
+                (!fFourn   || fFourn.includes(s.fournisseur||'')) &&
+                (!fMux     || fMux.includes(s.mux||''))
+            );
+
+            const tbody = document.getElementById('segmentsTableBody');
+            const countEl = document.getElementById('segmentsCount');
+            if (countEl) countEl.textContent = `${filtered.length} segment${filtered.length > 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="15" style="padding:2rem;text-align:center;color:var(--color-text-tertiary);">
+                    ${allSegments.length === 0 ? '<div style="font-size:1.5rem;margin-bottom:0.5rem;">📭</div>Aucun segment importé' : 'Aucun résultat pour ces filtres'}
+                </td></tr>`;
+                return;
+            }
+
+            const cell  = val => `<td style="${TD}">${val||'—'}</td>`;
+            const cellS = val => `<td style="${TDS}">${val||'—'}</td>`;
+            const badgeCell = val => val
+                ? `<td style="${TD}">${badge(val)}</td>`
+                : `<td style="${TD}"><span style="color:#CBD5E1;">—</span></td>`;
+
+            // Trouver l'index réel dans allSegments pour le clic
+            tbody.innerHTML = filtered.map(seg => {
+                const realIdx = allSegments.indexOf(seg);
+                return `<tr onclick="openModalFiltered(null, ${realIdx})" style="cursor:pointer;" onmouseover="this.style.background='rgba(59,130,246,0.04)'" onmouseout="this.style.background=''">
+                    ${cellS(seg.refLiaison)}
+                    ${cell(seg.typeLiaison)}
+                    ${badgeCell(seg.liaison)}
+                    ${cell(seg.nomSegment)}
+                    ${cell(seg.fournisseur)}
+                    ${cell(seg.extOrigineCode)}
+                    ${badgeCell(seg.typeExtA)}
+                    ${cell(seg.extOrigineType)}
+                    ${cell(seg.extCibleCode)}
+                    ${badgeCell(seg.typeExtB)}
+                    ${cell(seg.extCibleType)}
+                    ${cell(seg.nbFo)}
+                    ${cell(seg.longueur)}
+                    ${cell(seg.mux)}
+                    ${cell(seg.couleur)}
+                </tr>`;
+            }).join('');
+        }
+
+        function resetSegmentFilters() {
+            document.getElementById('segmentSearch').value = '';
+            ['ms-sref','ms-stype','ms-sliaison','ms-sfourn','ms-smux'].forEach(id => {
+                const drop = document.getElementById(id);
+                if (drop) drop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = true);
+                updateMsBtn(id);
+            });
+            filterSegmentsTable();
+        }
+
+        function renderSegmentsTable() {
+            populateSegmentFilters();
+            filterSegmentsTable();
+        }
+
+        // ── RECHERCHE DANS MODAL SEGMENTS ────────────────────────────────
+        function filterSegmentModal() {
+            const q = (document.getElementById('segmentModalSearch')?.value || '').toLowerCase();
+            document.querySelectorAll('#segmentsList .segment-item').forEach(item => {
+                const name = item.querySelector('.segment-name')?.textContent?.toLowerCase() || '';
+                item.style.display = name.includes(q) ? '' : 'none';
+            });
+        }
+        // ── FIN FILTRES ──────────────────────────────────────────────────
+        const PAGE_TABS = ['dashboard','infos','liaisons','segments','heb'];
+        const TH_STYLE = 'padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid var(--color-border);background:var(--color-bg);';
+
+        function switchPageTab(tab) {
+            PAGE_TABS.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`pageContent-${t}`);
+                if (btn) btn.classList.toggle('active', t === tab);
+                if (content) content.style.display = t === tab ? 'block' : 'none';
+            });
+
+            if (tab === 'infos')    renderInfosTab();
+            if (tab === 'liaisons') renderLiaisonsTable();
+            if (tab === 'segments') renderSegmentsTable();
+            if (tab === 'heb')      renderHebTable();
+        }
+
+        function showPageTabs() {
+            document.getElementById('pageTabsBar').style.display = 'block';
+            switchPageTab('dashboard');
+        }
+
+        function renderHebTable() {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            const topo     = getTopologies().find(t => t.name === topoName);
+            const tbody    = document.getElementById('hebTableBody');
+            const countEl  = document.getElementById('hebCount');
+            const session  = localStorage.getItem('collect2030_session');
+            const user     = session ? JSON.parse(session) : null;
+            const canEdit  = user && (user.role === 'be' || user.role === 'cp');
+
+            const all = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const hebs = topo ? all.filter(h => h.topoId === topo.id) : [];
+
+            if (countEl) countEl.textContent = `${hebs.length} hébergement${hebs.length > 1 ? 's' : ''}`;
+
+            const saveBtn = document.getElementById('hebSaveBtn');
+            if (saveBtn) saveBtn.style.display = canEdit && hebs.length > 0 ? 'inline-flex' : 'none';
+
+            if (hebs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="padding:3rem;text-align:center;color:var(--color-text-tertiary);">
+                    <div style="font-size:2rem;margin-bottom:0.75rem;">🏢</div>
+                    <div style="font-weight:600;color:var(--color-text-secondary);margin-bottom:0.375rem;">Aucun hébergement importé</div>
+                    <div style="font-size:0.875rem;">Utilisez <strong>📥 Importer Excel</strong> → Hébergements</div>
+                </td></tr>`;
+                return;
+            }
+
+            const TYPE_OPTS    = ['CO','Super CO'];
+            const ZONE_OPTS    = ['RIP','ZTD-AMII','ZMD RIP'];
+            const SALLE_OPTS   = ['Armoire extérieure','Salle HEP','Salle Orange'];
+
+            const editInput = (idx, field, val) => canEdit
+                ? `<input data-idx="${idx}" data-field="${field}" value="${val || ''}"
+                    onchange="markHebChanged(this)"
+                    style="width:100%;padding:0.3rem 0.5rem;border:1.5px solid var(--color-border);border-radius:6px;font-family:inherit;font-size:0.8125rem;background:var(--color-surface);color:var(--color-text-primary);">`
+                : (val || '—');
+
+            const editSelect = (idx, field, val, opts) => canEdit
+                ? `<select data-idx="${idx}" data-field="${field}" onchange="markHebChanged(this)"
+                    style="width:100%;padding:0.3rem 0.5rem;border:1.5px solid var(--color-border);border-radius:6px;font-family:inherit;font-size:0.8125rem;background:var(--color-surface);color:var(--color-text-primary);">
+                    ${opts.map(o => `<option${o === val ? ' selected' : ''}>${o}</option>`).join('')}
+                   </select>`
+                : `<span style="padding:0.2rem 0.5rem;background:#F1F5F9;color:#334155;border-radius:5px;font-size:0.75rem;font-weight:600;border:1px solid #E2E8F0;">${val || '—'}</span>`;
+
+            tbody.innerHTML = hebs.map((h, i) => `
+                <tr onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background=''">
+                    <td style="${TD} width:40px; text-align:center;">
+                        <button onclick="openHebModal('${topo?.id}','${h.id42c}')"
+                            title="Ouvrir les actions"
+                            style="width:28px;height:28px;border-radius:6px;border:1.5px solid var(--color-primary);background:rgba(59,130,246,0.07);color:var(--color-primary);cursor:pointer;font-size:0.875rem;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background='rgba(59,130,246,0.15)'" onmouseout="this.style.background='rgba(59,130,246,0.07)'">↗</button>
+                    </td>
+                    <td style="${TDS}">${h.topoName}</td>
+                    <td style="${TD}">${h.id42c || '—'}</td>
+                    <td style="${TD}">${editInput(i, 'siteCOIR', h.siteCOIR)}</td>
+                    <td style="${TD}">${editSelect(i, 'type', h.type, TYPE_OPTS)}</td>
+                    <td style="${TD}">${editSelect(i, 'zoneCO', h.zoneCO, ZONE_OPTS)}</td>
+                    <td style="${TD}">${editSelect(i, 'typeSalle', h.typeSalle, SALLE_OPTS)}</td>
+                    <td style="${TDS} text-align:center;">${h.lot ? 'LOT ' + h.lot : '—'}</td>
+                </tr>`).join('');
+        }
+
+        // Buffer des modifications hébergements
+        let hebChanges = {};
+
+        function markHebChanged(el) {
+            const idx   = el.dataset.idx;
+            const field = el.dataset.field;
+            if (!hebChanges[idx]) hebChanges[idx] = {};
+            hebChanges[idx][field] = el.value;
+            const saveBtn = document.getElementById('hebSaveBtn');
+            if (saveBtn) saveBtn.style.background = '#059669';
+        }
+
+        function saveHebergements() {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            const topo     = getTopologies().find(t => t.name === topoName);
+            if (!topo) return;
+
+            const all  = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const hebs = all.filter(h => h.topoId === topo.id);
+
+            Object.entries(hebChanges).forEach(([idx, changes]) => {
+                const heb = hebs[parseInt(idx)];
+                if (heb) Object.assign(heb, changes);
+            });
+
+            // Réinjecter dans le tableau global
+            const others  = all.filter(h => h.topoId !== topo.id);
+            const merged  = [...others, ...hebs];
+            localStorage.setItem('collect2030_hebergements', JSON.stringify(merged));
+
+            hebChanges = {};
+            const saveBtn = document.getElementById('hebSaveBtn');
+            if (saveBtn) { saveBtn.style.background = '#3B82F6'; saveBtn.textContent = '✅ Enregistré !'; }
+            setTimeout(() => { if (saveBtn) saveBtn.textContent = '💾 Enregistrer les modifications'; }, 2000);
+        }
+
+        // Conserver openDataViewModal pour compatibilité (ne fait plus rien)
+        function openDataViewModal() { switchPageTab('infos'); }
+        function closeDataViewModal() {}
+        function switchTab(tab) { switchPageTab(tab === 'infos' ? 'infos' : tab === 'liaisons' ? 'liaisons' : 'segments'); }
+
+        function renderInfosTab() {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            const topo = getTopologies().find(t => t.name === topoName);
+            if (!topo) return;
+
+            document.getElementById('infoTopoName').textContent = topo.name;
+            document.getElementById('infoTopoLot').textContent = topo.lot ? `LOT ${topo.lot}` : 'Non défini';
+
+            // Statut données
+            const liaisonsEl = document.getElementById('infoHasLiaisons');
+            const segmentsEl = document.getElementById('infoHasSegments');
+            if (topo.hasLiaisons) {
+                liaisonsEl.textContent = '✓ Importées';
+                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#34D399;';
+            } else {
+                liaisonsEl.textContent = '✗ Aucune liaison';
+                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#F87171;';
+            }
+            if (topo.hasSegments) {
+                segmentsEl.textContent = '✓ Importés';
+                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#34D399;';
+            } else {
+                segmentsEl.textContent = '✗ Aucun segment';
+                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#F87171;';
+            }
+
+            // Section CDP — visible seulement pour le BE
+            const session = localStorage.getItem('collect2030_session');
+            const user = session ? JSON.parse(session) : null;
+            const cdpSection = document.getElementById('infoCdpSection');
+
+            if (user && user.role === 'be') {
+                cdpSection.style.display = 'block';
+
+                // CDP actuel
+                const users = JSON.parse(localStorage.getItem('collect2030_users') || '[]');
+                const cdpUser = users.find(u => u.email === topo.cdpEmail);
+                document.getElementById('infoCdpCurrent').textContent = cdpUser ? cdpUser.name : 'Non affecté';
+
+                // Avertissement si pas de LOT
+                document.getElementById('infoCdpWarning').style.display = !topo.lot ? 'block' : 'none';
+
+                // Remplir la liste des CDP
+                const cdps = users.filter(u => u.role === 'cp' && u.status === 'actif');
+                const select = document.getElementById('infoCdpSelect');
+                select.innerHTML = '<option value="">Sélectionner un CDP</option>' +
+                    cdps.map(u => `<option value="${u.email}" ${u.email === topo.cdpEmail ? 'selected' : ''}>${u.name}</option>`).join('');
+                select.disabled = !topo.lot;
+            } else {
+                cdpSection.style.display = 'none';
+            }
+        }
+
+        function saveAffectationFromModal() {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            const cdpEmail = document.getElementById('infoCdpSelect').value;
+            if (!cdpEmail) { alert('Veuillez sélectionner un CDP'); return; }
+
+            const topos = getTopologies();
+            const topo  = topos.find(t => t.name === topoName);
+            if (!topo) return;
+            if (!topo.lot) { alert('❌ Un LOT doit être défini avant d\'affecter un CDP.'); return; }
+
+            topo.cdpEmail = cdpEmail;
+            saveTopologies(topos);
+            renderInfosTab();
+
+            const users = JSON.parse(localStorage.getItem('collect2030_users') || '[]');
+            const cdp = users.find(u => u.email === cdpEmail);
+            alert(`✅ Topologie affectée à ${cdp ? cdp.name : cdpEmail}`);
+        }
+
+        // ── Style commun aux deux tableaux ──────────────────────────────
+        const TH  = `padding: 0.625rem 1rem; text-align: left; font-size: 0.6875rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; border-bottom: 1.5px solid var(--color-border); background: #F8FAFC;`;
+        const TD  = `padding: 0.625rem 1rem; font-size: 0.8125rem; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border); white-space: nowrap;`;
+        const TDS = `padding: 0.625rem 1rem; font-size: 0.8125rem; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); white-space: nowrap;`;
+        const badge = (val) => val
+            ? `<span style="display:inline-block; padding: 0.2rem 0.5rem; background: #F1F5F9; color: #334155; border-radius: 5px; font-size: 0.75rem; font-weight: 600; border: 1px solid #E2E8F0; white-space:nowrap;">${val}</span>`
+            : `<span style="color:#CBD5E1;">—</span>`;
+
+        function renderLiaisonsTable() {
+            populateLiaisonFilters();
+            filterLiaisonsTable();
+        }
+
+        function closeDataViewModal() {
+            document.getElementById('dataViewModal').classList.remove('active');
+        }
+
+        function switchTab(tab) {
+            // Reset tous les tabs
+            ['tabInfos', 'tabLiaisons', 'tabSegments'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+            ['infosView', 'liaisonsView', 'segmentsView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
+            if (tab === 'infos') {
+                document.getElementById('tabInfos').classList.add('active');
+                document.getElementById('infosView').style.display = 'block';
+            } else if (tab === 'liaisons') {
+                document.getElementById('tabLiaisons').classList.add('active');
+                document.getElementById('liaisonsView').style.display = 'block';
+            } else {
+                document.getElementById('tabSegments').classList.add('active');
+                document.getElementById('segmentsView').style.display = 'block';
+            }
+        }
+
+        function renderSegmentsTable() {
+            populateSegmentFilters();
+            filterSegmentsTable();
+        }
+
+        function updateSegmentField(segmentIndex, field, value) {
+            // Mettre à jour la valeur du segment
+            console.log(`Segment ${segmentIndex} - ${field} mis à jour: ${value}`);
+            
+            // Animation visuelle de confirmation
+            const row = document.getElementById(`seg-row-${segmentIndex}`);
+            if (row) {
+                row.style.background = 'rgba(16, 185, 129, 0.2)';
+                setTimeout(() => {
+                    row.style.background = '';
+                }, 500);
+            }
+        }
+
+        function openCreateProjectModal() {
+            document.getElementById('createProjectModal').classList.add('active');
+            renderAvailableSegments();
+        }
+
+        function closeCreateProjectModal() {
+            document.getElementById('createProjectModal').classList.remove('active');
+            document.getElementById('projectForm').reset();
+            selectedSegments.clear();
+            document.getElementById('selectedCount').textContent = '0';
+        }
+
+        function renderAvailableSegments() {
+            const container = document.getElementById('availableSegmentsList');
+            const available = allSegments.filter(s => s.projectId === null);
+            
+            container.innerHTML = available.map((seg, idx) => `
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 8px; margin-bottom: 0.25rem; cursor: pointer; transition: all 0.2s;" 
+                     onclick="toggleSegmentSelection(${allSegments.indexOf(seg)})" 
+                     id="seg-item-${allSegments.indexOf(seg)}">
+                    <input type="checkbox" id="seg-check-${allSegments.indexOf(seg)}" 
+                           style="width: 18px; height: 18px; cursor: pointer;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.8125rem; font-weight: 600; font-family: 'Courier New', monospace; margin-bottom: 0.25rem;">${seg.nomSegment || seg.name || '—'}</div>
+                        <div style="font-size: 0.75rem; color: var(--color-text-secondary);">${seg.liaison || seg.type || '—'} • ${seg.longueur || seg.length || '—'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleSegmentSelection(index) {
+            const checkbox = document.getElementById(`seg-check-${index}`);
+            const item = document.getElementById(`seg-item-${index}`);
+            
+            if (selectedSegments.has(index)) {
+                selectedSegments.delete(index);
+                checkbox.checked = false;
+                item.style.borderColor = 'var(--color-border)';
+                item.style.background = 'var(--color-surface)';
+            } else {
+                selectedSegments.add(index);
+                checkbox.checked = true;
+                item.style.borderColor = 'var(--color-primary)';
+                item.style.background = 'rgba(59, 130, 246, 0.1)';
+            }
+            
+            document.getElementById('selectedCount').textContent = selectedSegments.size;
+        }
+
+        function createProject(event) {
+            event.preventDefault();
+            
+            if (selectedSegments.size === 0) {
+                alert('Veuillez sélectionner au moins un segment');
+                return;
+            }
+            
+            const name = document.getElementById('projectName').value;
+            const cdt = document.getElementById('projectCDT').value;
+            const company = document.getElementById('projectCompany').value;
+            
+            const projectId = projects.length;
+            const project = {
+                id: projectId,
+                name: name,
+                cdt: cdt,
+                company: company,
+                segments: []
+            };
+            
+            selectedSegments.forEach(segIndex => {
+                allSegments[segIndex].projectId = projectId;
+                project.segments.push(allSegments[segIndex]);
+            });
+            
+            projects.push(project);
+            
+            alert(`✅ Projet "${name}" créé avec succès !\n\n${selectedSegments.size} segment(s) affecté(s)\nCDT: ${cdt}\nEntreprise: ${company}`);
+            
+            closeCreateProjectModal();
+            updateDashboard();
+        }
+
+        function init() {
+            renderPhases();
+            updateDashboard();
+            initChart();
+        }
+
+        function renderPhases() {
+            const etats = loadEtats();
+            const container = document.getElementById('phasesContainer');
+            const PHASE_META = {
+                etude:     { letter: 'A', title: 'Étude',     cls: 'etude' },
+                travaux:   { letter: 'B', title: 'Travaux',   cls: 'travaux' },
+                cloture:   { letter: 'C', title: 'Clôture',   cls: 'cloture' },
+                migration: { letter: 'D', title: 'Migration', cls: 'migration' }
+            };
+
+            const grouped = {};
+            etats.forEach(e => {
+                if (!grouped[e.phase]) grouped[e.phase] = [];
+                grouped[e.phase].push(e);
+            });
+
+            container.innerHTML = Object.entries(PHASE_META).map(([phaseKey, meta]) => {
+                const items = grouped[phaseKey] || [];
+                return `
+                    <div class="phase-group ${meta.cls}">
+                        <div class="phase-header">
+                            <div class="phase-icon ${meta.cls}">${meta.letter}</div>
+                            <div class="phase-title">${meta.title}</div>
+                            <div class="phase-progress" id="phase-${phaseKey}-percent">0%</div>
+                        </div>
+                        <div class="jalons-list">
+                            ${items.map(e => `
+                                <div class="jalon-item" onclick="openModalFiltered(${e.id})" style="cursor: pointer;">
+                                    <div class="jalon-number">${e.id}</div>
+                                    <div class="jalon-name">${e.name}</div>
+                                    <div class="jalon-count" id="jalon-${e.id}">0</div>
+                                    <div class="jalon-bar">
+                                        <div class="jalon-bar-fill" id="bar-${e.id}" style="width: 0%"></div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderStats(role, user) {
+            const grid = document.getElementById('statsGrid');
+            const allTopos = getTopologies();
+
+            const statCard = (label, value, sublabel, color) => `
+                <div class="stat-card">
+                    <div class="stat-label">${label}</div>
+                    <div class="stat-value" style="color:${color || 'var(--color-text-primary)'};">${value}</div>
+                    <div class="stat-change">${sublabel}</div>
+                </div>`;
+
+            if (role === 'pilote') {
+                const total    = allTopos.length;
+                const pretes   = allTopos.filter(t => (t.hasLiaisons || t.hasSegments) && !t.cdpEmail).length;
+                const affectees = allTopos.filter(t => t.cdpEmail).length;
+                grid.innerHTML =
+                    statCard('Total topologies', total,    'Créées',              'var(--color-text-primary)') +
+                    statCard('Prêtes',            pretes,  'Données importées, sans CDP', '#D97706') +
+                    statCard('Affectées',          affectees, 'Avec CDP assigné',  '#059669');
+
+            } else if (role === 'be') {
+                const total    = allTopos.length;
+                const avecData = allTopos.filter(t => t.hasLiaisons || t.hasSegments).length;
+                const sansData = total - avecData;
+                grid.innerHTML =
+                    statCard('Topologies', total,    'Disponibles',          'var(--color-text-primary)') +
+                    statCard('Alimentées', avecData, 'Avec données importées', '#059669') +
+                    statCard('Liaisons',   liaisons.length, 'Topo sélectionnée', 'var(--color-text-primary)') +
+                    statCard('Segments',   allSegments.length, 'Topo sélectionnée', 'var(--color-text-primary)');
+
+            } else {
+                // CDP
+                const myTopos = allTopos.filter(t => t.cdpEmail === user.email);
+                grid.innerHTML =
+                    statCard('Topologies', myTopos.length, 'Affectées',         'var(--color-text-primary)') +
+                    statCard('Liaisons',   liaisons.length, 'Types de liaisons', 'var(--color-text-primary)') +
+                    statCard('Segments',   allSegments.length, '—',              'var(--color-text-primary)') +
+                    `<div class="stat-card">
+                        <div class="stat-label">Progression</div>
+                        <div class="stat-value" id="progressValue">0%</div>
+                        <div class="stat-change" id="progressChange">—</div>
+                    </div>`;
+            }
+        }
+
+        function updateDashboard() {
+            // Stats selon rôle
+            const session = localStorage.getItem('collect2030_session');
+            const user = session ? JSON.parse(session) : { role: 'cp' };
+            renderStats(user.role, user);
+
+            if (allSegments.length === 0) return;
+
+            const etats = loadEtats();
+            const statusCounts = {};
+            etats.forEach(e => statusCounts[e.id] = 0);
+            allSegments.forEach(seg => {
+                if (statusCounts[seg.status] !== undefined) statusCounts[seg.status]++;
+            });
+
+            // Mettre à jour chaque jalon dynamiquement
+            etats.forEach(e => {
+                const count = statusCounts[e.id] || 0;
+                const percentage = Math.round((count / allSegments.length) * 100);
+                const jalonEl = document.getElementById(`jalon-${e.id}`);
+                const barEl = document.getElementById(`bar-${e.id}`);
+                if (jalonEl) jalonEl.textContent = count;
+                if (barEl) barEl.style.width = percentage + '%';
+            });
+
+            // Calcul par phase dynamique
+            const phaseIds = { etude: [], travaux: [], cloture: [], migration: [] };
+            etats.forEach(e => { if (phaseIds[e.phase]) phaseIds[e.phase].push(e.id); });
+
+            const phasePercent = {};
+            Object.entries(phaseIds).forEach(([phase, ids]) => {
+                if (ids.length === 0) { phasePercent[phase] = 0; return; }
+                const total = ids.reduce((sum, id) => sum + (statusCounts[id] || 0), 0);
+                phasePercent[phase] = Math.round((total / allSegments.length) * 100);
+            });
+
+            ['etude', 'travaux', 'cloture', 'migration'].forEach(phase => {
+                const el = document.getElementById(`phase-${phase}-percent`);
+                if (el) el.textContent = (phasePercent[phase] || 0) + '%';
+                const ring = document.getElementById(`ring-${phase}`);
+                const ringVal = document.getElementById(`ring-${phase}-val`);
+                if (ring) ring.style.width = (phasePercent[phase] || 0) + '%';
+                if (ringVal) ringVal.textContent = (phasePercent[phase] || 0) + '%';
+            });
+
+            const globalProgress = Math.round(Object.values(phasePercent).reduce((a, b) => a + b, 0) / 4);
+            document.getElementById('progressValue').textContent = globalProgress + '%';
+
+            updateChart(phasePercent.etude || 0, phasePercent.travaux || 0, phasePercent.cloture || 0, phasePercent.migration || 0);
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Étude', 'Travaux', 'Clôture', 'Migration'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 46, 0.9)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: '600' },
+                            bodyFont: { size: 13 },
+                            cornerRadius: 8,
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function updateChart(etude, travaux, cloture, migration) {
+            if (chart) {
+                chart.data.datasets[0].data = [etude, travaux, cloture, migration];
+                chart.update();
+            }
+        }
+
+        function simulateProgress() {
+            const numToAdvance = Math.floor(Math.random() * 15) + 5;
+            for (let i = 0; i < numToAdvance; i++) {
+                const randomIndex = Math.floor(Math.random() * allSegments.length);
+                if (allSegments[randomIndex].status < 11) {
+                    allSegments[randomIndex].status++;
+                }
+            }
+            updateDashboard();
+        }
+
+        function openModal() {
+            openModalFiltered(null);
+        }
+
+        function openModalFiltered(statusFilter, focusIdx = null) {
+            const modal = document.getElementById('segmentsModal');
+            const list  = document.getElementById('segmentsList');
+            const titleEl = document.getElementById('segmentsModalTitle');
+            const searchEl = document.getElementById('segmentModalSearch');
+            if (searchEl) searchEl.value = '';
+
+            const segments = statusFilter !== null
+                ? allSegments.filter(seg => seg.status === statusFilter)
+                : allSegments;
+
+            if (statusFilter !== null) {
+                titleEl.textContent = `Segments "${getStatusNames()[statusFilter]}" (${segments.length})`;
+            } else if (focusIdx !== null) {
+                const seg = allSegments[focusIdx];
+                titleEl.textContent = seg ? (seg.nomSegment || 'Segment') : 'Gestion des segments';
+            } else {
+                titleEl.textContent = 'Gestion des segments';
+            }
+
+            list.innerHTML = segments.map(seg => {
+                const index = allSegments.indexOf(seg);
+                const isTarget = index === focusIdx;
+                return `
+                <div class="segment-card" id="seg-card-${index}"
+                     style="display:grid; grid-template-columns:2fr 1fr 200px; gap:0.5rem; align-items:center;
+                            ${isTarget ? 'background:rgba(59,130,246,0.07); border-radius:8px; padding:0.25rem 0.5rem; border:1.5px solid rgba(59,130,246,0.3);' : ''}">
+                    <div class="segment-info">
+                        <div class="segment-name">${seg.nomSegment||seg.name||'—'}</div>
+                        <div class="segment-meta">${seg.liaison||seg.type||'—'} • ${seg.longueur||seg.length||'—'}</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <span class="segment-badge" style="background:${getStatusColors()[seg.status]};color:${getStatusTextColors()[seg.status]};font-size:0.7rem;padding:0.4rem 0.75rem;">
+                            ${getStatusNames()[seg.status]}
+                        </span>
+                    </div>
+                    <select onchange="updateSegmentStatus(${index}, this.value)"
+                            style="width:100%;padding:0.5rem;background:var(--color-surface);border:1.5px solid var(--color-border);border-radius:6px;color:var(--color-text-primary);font-size:0.8125rem;cursor:pointer;">
+                        ${getStatusNames().map((s, i) => `<option value="${i}" ${seg.status===i?'selected':''}>${s}</option>`).join('')}
+                    </select>
+                </div>`;
+            }).join('');
+
+            modal.classList.add('active');
+
+            // Scroll vers le segment ciblé
+            if (focusIdx !== null) {
+                setTimeout(() => {
+                    const el = document.getElementById(`seg-card-${focusIdx}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        // ── MODAL HÉBERGEMENT ACTIONS ────────────────────────────────────
+        const HEB_ACTIONS = [
+            { id: 'dateMAD',         label: 'Date MAD par Orange',                        type: 'date' },
+            { id: 'mailOrangeAnnB',  label: 'Mail envoyé vers Orange pour prise RDV Annexe B', type: 'oui_non' },
+            { id: 'dateVisiteB',     label: 'Date de visite retenue (Annexe B)',           type: 'date' },
+            { id: 'visiteRealisee',  label: 'Visite réalisée',                             type: 'oui_non' },
+            { id: 'annexeABSignee',  label: 'Annexe A & B signée',                        type: 'oui_non' },
+            { id: 'dateDepPFTO1',    label: 'Date dépôse PFTO (Annexe A&B)',              type: 'date' },
+            { id: 'dteHepoc',        label: 'DTE - HEPOC déposée',                        type: 'oui_non' },
+            { id: 'dateDepPFTO2',    label: 'Date dépôse PFTO (DTE)',                     type: 'date' },
+            { id: 'cmdMaterielle',   label: 'Commande matérielle',                         type: 'oui_non' },
+            { id: 'dateReception',   label: 'Date de réception',                           type: 'date' },
+            { id: 'installEquip',    label: 'Installation équipements',                   type: 'oui_non' },
+            { id: 'mailVeritas',     label: 'Mail envoyé pour prise RDV Veritas',         type: 'oui_non' },
+            { id: 'dateVisiteVeritas',label: 'Date de visite retenue (Veritas)',           type: 'date' },
+            { id: 'consuelVeritas',  label: 'Consuel VERITAS réalisé',                    type: 'oui_non' },
+            { id: 'consuelValide',   label: 'Consuel validé',                              type: 'oui_non' },
+            { id: 'dateDepPFTO3',    label: 'Date dépôse PFTO (Consuel)',                 type: 'date' },
+            { id: 'mailOrangeAnnC',  label: 'Mail envoyé vers Orange pour prise RDV Annexe C', type: 'oui_non' },
+            { id: 'dateVisiteC',     label: 'Date de visite retenue (Annexe C)',           type: 'date' },
+            { id: 'visiteAnnC',      label: 'Visite réalisée pour Annexe C',               type: 'oui_non' },
+            { id: 'annexeCSignee',   label: 'Annexe C signée',                             type: 'oui_non' },
+            { id: 'dateDepPFTO4',    label: 'Date dépôse PFTO (Annexe C)',                type: 'date' },
+            { id: 'dtdHepoc',        label: 'DTD - HEPOC déposée',                        type: 'oui_non' },
+            { id: 'dateDepPFTO5',    label: 'Date dépôse PFTO (DTD)',                     type: 'date' },
+        ];
+
+        let currentHebIdx = null; // index dans collect2030_hebergements pour la topo courante
+
+        function openHebModal(topoId, hebId42c) {
+            const all  = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const hebs = all.filter(h => h.topoId === topoId);
+            const idx  = hebs.findIndex(h => h.id42c === hebId42c);
+            if (idx === -1) return;
+            currentHebIdx = { topoId, id42c: hebId42c };
+
+            const heb = hebs[idx];
+            const actions = heb.actions || {};
+
+            document.getElementById('hebModalTitle').textContent = `${heb.topoName} — ${heb.id42c || 'Sans ID'} (LOT ${heb.lot||'?'})`;
+
+            const body = document.getElementById('hebModalBody');
+            body.innerHTML = HEB_ACTIONS.map(a => {
+                const val = actions[a.id] || '';
+                if (a.type === 'oui_non') {
+                    return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.625rem 0; border-bottom:1px solid var(--color-border);">
+                        <label style="font-size:0.875rem; color:var(--color-text-primary); flex:1;">${a.label}</label>
+                        <select data-action="${a.id}" style="padding:0.3rem 0.5rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-primary); min-width:100px;">
+                            <option value="">—</option>
+                            <option value="OUI" ${val==='OUI'?'selected':''}>OUI</option>
+                            <option value="NON" ${val==='NON'?'selected':''}>NON</option>
+                        </select>
+                    </div>`;
+                } else {
+                    return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.625rem 0; border-bottom:1px solid var(--color-border);">
+                        <label style="font-size:0.875rem; color:var(--color-text-secondary); flex:1; font-style:italic;">${a.label}</label>
+                        <input type="date" data-action="${a.id}" value="${val}"
+                            style="padding:0.3rem 0.5rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-primary);">
+                    </div>`;
+                }
+            }).join('');
+
+            document.getElementById('hebModal').style.display = 'flex';
+        }
+
+        function closeHebModal() {
+            document.getElementById('hebModal').style.display = 'none';
+            currentHebIdx = null;
+        }
+
+        function saveHebActions() {
+            if (!currentHebIdx) return;
+            const all  = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const heb  = all.find(h => h.topoId === currentHebIdx.topoId && h.id42c === currentHebIdx.id42c);
+            if (!heb) return;
+
+            if (!heb.actions) heb.actions = {};
+            document.querySelectorAll('#hebModalBody [data-action]').forEach(el => {
+                heb.actions[el.dataset.action] = el.value;
+            });
+
+            localStorage.setItem('collect2030_hebergements', JSON.stringify(all));
+            closeHebModal();
+            renderHebTable();
+        }
+        // ── FIN MODAL HÉBERGEMENT ────────────────────────────────────────
+
+        function updateSegmentStatus(segmentIndex, newStatus) {
+            const oldStatus = allSegments[segmentIndex].status;
+            allSegments[segmentIndex].status = parseInt(newStatus);
+            updateDashboard();
+            const statusName = getStatusNames()[newStatus];
+            console.log('Segment ' + segmentIndex + ' : ' + getStatusNames()[oldStatus] + ' → ' + statusName);
+        }
+
+        function closeModal() {
+            document.getElementById('segmentsModal').classList.remove('active');
+        }
+
+        function exportData() {
+            alert('Export Excel en préparation...');
+        }
+
+        // ── TOPOLOGIES AFFECTÉES (déclaré avant init()) ─────────────────
+        let topologiesAffectees = JSON.parse(localStorage.getItem('collect2030_topo_affectees') || '[]');
+
+        init();
+
+        // ── GESTION DES RÔLES ───────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            const raw = localStorage.getItem('collect2030_session');
+            if (!raw) { window.location.href = 'login.html'; return; }
+
+            const user = JSON.parse(raw);
+            if (!['cp', 'be', 'pilote'].includes(user.role)) { window.location.href = 'login.html'; return; }
+
+            document.getElementById('userName').textContent = user.name;
+            const roleLabels = { cp: 'Chef de Projet', be: 'Bureau d\'Études', pilote: 'Pilote' };
+            document.getElementById('userRole').textContent = roleLabels[user.role] || user.role;
+
+            if (user.role === 'be') {
+                document.querySelector('h1').textContent = 'Bureau d\'Études';
+                // importBtn masqué par défaut, visible après sélection d'une topo
+                document.getElementById('createProjectBtn').style.display = 'none';
+            }
+
+            if (user.role === 'pilote') {
+                document.getElementById('piloteNavButton').style.display = 'block';
+                document.getElementById('filterLots').style.display = 'inline-flex';
+                document.getElementById('filterLiaisons').style.display = 'inline-flex';
+                document.getElementById('filterSecteurs').style.display = 'inline-flex';
+            }
+
+            // ── Alimenter le dropdown topologies ──────────────────────
+            const allTopos = getTopologies();
+            let myTopos = [];
+
+            if (user.role === 'cp') {
+                myTopos = allTopos.filter(t => t.cdpEmail === user.email);
+            } else if (user.role === 'be') {
+                myTopos = allTopos; // BE voit toutes les topos
+            } else if (user.role === 'pilote') {
+                myTopos = allTopos;
+            }
+
+            topologiesAffectees = myTopos.map(t => t.name);
+
+            // Afficher les stats dès le chargement
+            renderStats(user.role, user);
+
+            if (myTopos.length > 0 && user.role !== 'be') {
+                // Sélectionner la première topo automatiquement (sauf BE)
+                selectTopoById(myTopos[0].id);
+            } else {
+                // Aucune topo sélectionnée : tout vider
+                liaisons.length = 0;
+                allSegments.length = 0;
+                // Masquer tous les boutons dépendants
+                
+                document.getElementById('allSegmentsBtn').style.display = 'none';
+                document.getElementById('viderTopoBtn').style.display = 'none';
+                if (user.role === 'be') {
+                    document.getElementById('importBtn').style.display = 'none';
+                }
+                renderPhases();
+                updateDashboard();
+            }
+        });
+        // ── FIN GESTION RÔLES ───────────────────────────────────────────
+
+        function selectTopoById(topoId) {
+            const topos = getTopologies();
+            const topo  = topos.find(t => t.id === topoId);
+            if (!topo) return;
+
+            document.getElementById('topoFilterLabel').textContent = topo.name;
+
+            // Charger les liaisons de cette topo
+            const allL = JSON.parse(localStorage.getItem('collect2030_liaisons') || '[]');
+            liaisons.length = 0;
+            allL.filter(l => l.topoId === topoId).forEach(l => liaisons.push(l));
+
+            // Charger les segments de cette topo
+            const allS = JSON.parse(localStorage.getItem('collect2030_segments') || '[]');
+            allSegments.length = 0;
+            allS.filter(s => s.topoId === topoId).forEach(s => allSegments.push(s));
+
+            // Afficher les boutons dépendants de la topo
+            const session = localStorage.getItem('collect2030_session');
+            const user = session ? JSON.parse(session) : null;
+            
+            document.getElementById('allSegmentsBtn').style.display = 'inline-flex';
+            if (user && user.role === 'be') {
+                document.getElementById('importBtn').style.display = 'inline-flex';
+                document.getElementById('viderTopoBtn').style.display = 'inline-flex';
+            } else if (user && user.role !== 'be') {
+                document.getElementById('simulerBtn').style.display = 'inline-flex';
+            }
+
+            renderPhases();
+            updateDashboard();
+            showPageTabs();
+        }
+
+        function selectTopo(name) {
+            const topo = getTopologies().find(t => t.name === name);
+            if (topo) selectTopoById(topo.id);
+            document.getElementById('topoDropdown').style.display = 'none';
+        }
+
+        // ── TOPOLOGIES AFFECTÉES ────────────────────────────────────────
+
+        function toggleTopoDropdown() {
+            const dropdown = document.getElementById('topoDropdown');
+            const isOpen = dropdown.style.display === 'block';
+            dropdown.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) renderTopoDropdown();
+        }
+
+        function renderTopoDropdown() {
+            const list = document.getElementById('topoDropdownList');
+            if (topologiesAffectees.length === 0) {
+                list.innerHTML = `
+                    <div style="padding: 1.25rem; text-align: center;">
+                        <div style="font-size: 1.25rem; margin-bottom: 0.25rem;">📭</div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-tertiary); font-weight: 500;">Aucune topologie affectée</div>
+                    </div>`;
+            } else {
+                const tous = `<div class="topo-tous" onclick="selectTous()">🌐 Toutes les topologies</div>`;
+                list.innerHTML = tous + topologiesAffectees.map(name => `
+                    <div onclick="selectTopo('${name}')"
+                         style="padding: 0.75rem 1.25rem; font-size: 0.875rem; cursor: pointer; border-bottom: 1px solid var(--color-border); transition: background 0.15s;"
+                         onmouseover="this.style.background='var(--color-bg)'"
+                         onmouseout="this.style.background=''">
+                        ${name}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function selectTous() {
+            document.getElementById('topoFilterLabel').textContent = 'Toutes les topologies';
+            document.getElementById('topoDropdown').style.display = 'none';
+
+            // Agréger toutes les données
+            const allL = JSON.parse(localStorage.getItem('collect2030_liaisons') || '[]');
+            const allS = JSON.parse(localStorage.getItem('collect2030_segments') || '[]');
+            const session = localStorage.getItem('collect2030_session');
+            const user = session ? JSON.parse(session) : null;
+
+            let filteredL = allL, filteredS = allS;
+            if (user && user.role === 'cp') {
+                const myTopoIds = getTopologies().filter(t => t.cdpEmail === user.email).map(t => t.id);
+                filteredL = allL.filter(l => myTopoIds.includes(l.topoId));
+                filteredS = allS.filter(s => myTopoIds.includes(s.topoId));
+            }
+
+            liaisons.length = 0;
+            filteredL.forEach(l => liaisons.push(l));
+            allSegments.length = 0;
+            filteredS.forEach(s => allSegments.push(s));
+
+            // Afficher boutons
+            document.getElementById('allSegmentsBtn').style.display = 'inline-flex';
+            if (user && user.role === 'be') {
+                document.getElementById('importBtn').style.display = 'none'; // pas d'import sans topo précise
+                document.getElementById('viderTopoBtn').style.display = 'none';
+            } else if (user && user.role !== 'be') {
+                document.getElementById('simulerBtn').style.display = 'inline-flex';
+            }
+
+            renderPhases();
+            updateDashboard();
+            showPageTabs();
+        }
+
+        function selectTopo(name) {
+            const topo = getTopologies().find(t => t.name === name);
+            if (topo) selectTopoById(topo.id);
+            else document.getElementById('topoFilterLabel').textContent = name;
+            document.getElementById('topoDropdown').style.display = 'none';
+        }
+
+        // Fermer le dropdown si clic en dehors
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('topoFilterBtn').contains(e.target)) {
+                document.getElementById('topoDropdown').style.display = 'none';
+            }
+        });
+        // ── FIN TOPOLOGIES ──────────────────────────────────────────────
+
+        // Fonction de déconnexion
+        // ── IMPORT EXCEL ──────────────────────────────────────────────
+        let currentImportType = 'ls'; // 'ls' ou 'heb'
+
+        function selectImportType(type) {
+            currentImportType = type;
+            const lsCard  = document.getElementById('importTypeLS');
+            const hebCard = document.getElementById('importTypeHEB');
+            const lotSection = document.getElementById('importLotSection');
+            const hebInfo    = document.getElementById('importHebInfo');
+            const hint       = document.getElementById('importFileHint');
+
+            if (type === 'ls') {
+                lsCard.style.border  = '2px solid var(--color-primary)';
+                lsCard.style.background = 'rgba(59,130,246,0.05)';
+                hebCard.style.border = '2px solid var(--color-border)';
+                hebCard.style.background = 'var(--color-surface)';
+                lotSection.style.display = 'block';
+                hebInfo.style.display    = 'none';
+                hint.textContent = 'Fichier avec onglets Liaisons et Segments';
+            } else {
+                hebCard.style.border  = '2px solid var(--color-primary)';
+                hebCard.style.background = 'rgba(59,130,246,0.05)';
+                lsCard.style.border  = '2px solid var(--color-border)';
+                lsCard.style.background = 'var(--color-surface)';
+                lotSection.style.display = 'none';
+                hebInfo.style.display    = 'block';
+                hint.textContent = 'Fichier Hébergements (6 colonnes)';
+            }
+        }
+
+        function openImportModal() {
+            currentImportType = 'ls';
+            const topos  = getTopologies();
+            const select = document.getElementById('importTopoSelect');
+            const warning = document.getElementById('noTopoWarning');
+
+            selectImportType('ls');
+
+            if (topos.length === 0) {
+                select.innerHTML = '<option value="">Aucune topologie disponible</option>';
+                warning.style.display = 'block';
+                document.getElementById('importConfirmBtn').disabled = true;
+            } else {
+                warning.style.display = 'none';
+                document.getElementById('importConfirmBtn').disabled = false;
+                select.innerHTML = '<option value="">Sélectionner une topologie</option>' +
+                    topos.map(t => `<option value="${t.id}" data-lot="${t.lot || ''}">${t.name}${t.lot ? ' — LOT '+t.lot : ''}</option>`).join('');
+            }
+
+            select.onchange = function() {
+                const opt = this.options[this.selectedIndex];
+                const lot = opt.dataset.lot;
+                if (lot) document.getElementById('importLotInput').value = lot;
+            };
+
+            document.getElementById('importFileName').textContent = 'Cliquez pour choisir un fichier';
+            document.getElementById('importLotInput').value = '';
+            document.getElementById('importModal').style.display = 'flex';
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        function triggerFileInput() {
+            const topoId = document.getElementById('importTopoSelect').value;
+            if (!topoId) { alert('❌ Veuillez sélectionner une topologie.'); return; }
+
+            if (currentImportType === 'ls') {
+                const lot = document.getElementById('importLotInput').value.trim();
+                if (!lot) { alert('❌ Veuillez saisir un numéro de LOT.'); return; }
+            }
+
+            document.getElementById('importFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById('importFileName').textContent = file.name;
+            event.target.value = '';
+
+            const topoId = document.getElementById('importTopoSelect').value;
+            const lot    = document.getElementById('importLotInput').value.trim();
+            if (!topoId) { alert('❌ Topologie requise.'); return; }
+            if (currentImportType === 'ls' && !lot) { alert('❌ LOT requis.'); return; }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (currentImportType === 'ls') parseXLSX(e.target.result, file.name, topoId, lot);
+                else parseXLSXHeb(e.target.result, file.name);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // ── IMPORT HÉBERGEMENTS ────────────────────────────────────────
+        const HEB_TYPE_VALS     = ['CO', 'Super CO'];
+        const HEB_ZONE_VALS     = ['RIP', 'ZTD-AMII', 'ZMD RIP'];
+        const HEB_SALLE_VALS    = ['Armoire extérieure', 'Salle HEP', 'Salle Orange'];
+
+        function parseXLSXHeb(buffer, filename) {
+            try {
+                if (typeof XLSX === 'undefined') { alert('❌ Librairie XLSX non chargée.'); return; }
+                const wb    = XLSX.read(buffer, { type: 'array' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows  = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                processHebRows(rows, filename);
+            } catch(err) {
+                alert('❌ Erreur lecture fichier : ' + err.message);
+            }
+        }
+
+        function processHebRows(rows, filename) {
+            if (rows.length < 2) { alert('❌ Fichier vide.'); return; }
+
+            const topos    = getTopologies();
+            const allSegs  = JSON.parse(localStorage.getItem('collect2030_segments') || '[]');
+            const dataRows = rows.slice(1);
+
+            const valid   = [];
+            const errors  = [];
+
+            dataRows.forEach((row, idx) => {
+                if (row.every(c => c === '' || c === null)) return;
+
+                const lineNum    = idx + 2;
+                const topoName   = String(row[0] || '').trim();
+                const id42c      = String(row[1] || '').trim();
+                const siteCOIR   = String(row[2] || '').trim();
+                const type       = String(row[3] || '').trim();
+                const zoneCO     = String(row[4] || '').trim();
+                const typeSalle  = String(row[5] || '').trim();
+
+                const lineErrors = [];
+
+                // Contrôle TOPOLOGIE
+                const topo = topos.find(t => t.name === topoName);
+                if (!topoName || !topo) {
+                    lineErrors.push(`Topologie "${topoName}" inexistante`);
+                } else {
+                    // Segments injectés ?
+                    const hasSegs = allSegs.some(s => s.topoId === topo.id);
+                    if (!hasSegs) lineErrors.push(`La topologie "${topoName}" n'a pas de segments injectés`);
+                    // LOT défini ?
+                    if (!topo.lot) lineErrors.push(`La topologie "${topoName}" n'a pas de LOT défini`);
+                }
+
+                // Contrôle valeurs énumérées
+                if (!HEB_TYPE_VALS.includes(type))
+                    lineErrors.push(`Type invalide : "${type}" (attendu : ${HEB_TYPE_VALS.join(', ')})`);
+                if (!HEB_ZONE_VALS.includes(zoneCO))
+                    lineErrors.push(`Zone CO invalide : "${zoneCO}" (attendu : ${HEB_ZONE_VALS.join(', ')})`);
+                if (!HEB_SALLE_VALS.includes(typeSalle))
+                    lineErrors.push(`Type de Salle invalide : "${typeSalle}" (attendu : ${HEB_SALLE_VALS.join(', ')})`);
+
+                if (lineErrors.length > 0) {
+                    errors.push({ line: lineNum, fields: lineErrors });
+                } else {
+                    valid.push({
+                        topoId:    topo.id,
+                        topoName,
+                        lot:       topo.lot,
+                        id42c,
+                        siteCOIR,
+                        type,
+                        zoneCO,
+                        typeSalle
+                    });
+                }
+            });
+
+            // Rapport d'erreurs
+            if (errors.length > 0) {
+                let msg = `⚠️ ${errors.length} ligne(s) bloquée(s) :\n\n`;
+                errors.forEach(e => {
+                    msg += `Ligne ${e.line} :\n`;
+                    e.fields.forEach(f => msg += `  • ${f}\n`);
+                    msg += '\n';
+                });
+                if (valid.length > 0) {
+                    msg += `✅ ${valid.length} ligne(s) valide(s) seront intégrées.`;
+                } else {
+                    msg += `❌ Aucune ligne valide. Import annulé.`;
+                    alert(msg);
+                    return;
+                }
+                if (!confirm(msg + '\n\nContinuer avec les lignes valides ?')) return;
+            }
+
+            if (valid.length === 0) { alert('❌ Aucune ligne valide.'); return; }
+
+            // Sauvegarder
+            const existing = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const merged   = [...existing, ...valid];
+            localStorage.setItem('collect2030_hebergements', JSON.stringify(merged));
+
+            closeImportModal();
+            alert(`✅ Import Hébergements réussi !\n\n📁 ${filename}\n✅ ${valid.length} hébergement(s) intégré(s)${errors.length > 0 ? `\n⚠️ ${errors.length} ligne(s) ignorée(s)` : ''}`);
+        }
+        // ── FIN IMPORT HÉBERGEMENTS ────────────────────────────────────
+
+        function parseXLSX(buffer, filename, topoId, lot) {
+            try {
+                if (typeof XLSX === 'undefined') {
+                    alert('❌ La librairie XLSX n\'est pas chargée.');
+                    return;
+                }
+
+                const workbook = XLSX.read(buffer, { type: 'array' });
+
+                // Chercher les onglets Liaisons et Segments
+                const sheetNames = workbook.SheetNames.map(s => s.toLowerCase().trim());
+                const liaisonIdx = sheetNames.findIndex(s => s.includes('liaison'));
+                const segmentIdx = sheetNames.findIndex(s => s.includes('segment'));
+
+                let importedLiaisons = 0;
+                let importedSegments = 0;
+
+                // ── Import Liaisons ──────────────────────────────────────
+                if (liaisonIdx >= 0) {
+                    const sheet = workbook.Sheets[workbook.SheetNames[liaisonIdx]];
+                    const rows  = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                    const data  = rows.slice(1); // skip header
+
+                    const parsed = data
+                        .filter(r => r.some(c => c !== '' && c !== null))
+                        .map(r => ({
+                            topoId,
+                            refLiaison:     String(r[0] || '').trim(),
+                            type:           String(r[1] || '').trim(),
+                            code:           String(r[2] || '').trim(),
+                            extOrigineCode: String(r[3] || '').trim(),
+                            typeA:          String(r[4] || '').trim(),
+                            extCibleCode:   String(r[5] || '').trim(),
+                            typeB:          String(r[6] || '').trim(),
+                            count:          0
+                        }))
+                        .filter(r => r.code);
+
+                    // Remplacer les liaisons de cette topo
+                    const existing = JSON.parse(localStorage.getItem('collect2030_liaisons') || '[]')
+                        .filter(l => l.topoId !== topoId);
+                    const merged = [...existing, ...parsed];
+                    localStorage.setItem('collect2030_liaisons', JSON.stringify(merged));
+                    liaisons.length = 0;
+                    merged.filter(l => l.topoId === topoId).forEach(l => liaisons.push(l));
+                    importedLiaisons = parsed.length;
+                }
+
+                // ── Import Segments ──────────────────────────────────────
+                if (segmentIdx >= 0) {
+                    const sheet = workbook.Sheets[workbook.SheetNames[segmentIdx]];
+                    const rows  = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                    const data  = rows.slice(1);
+
+                    const parsed = data
+                        .filter(r => r.some(c => c !== '' && c !== null))
+                        .map(r => ({
+                            topoId,
+                            refLiaison:     String(r[0]  || '').trim(),
+                            typeLiaison:    String(r[1]  || '').trim(),
+                            liaison:        String(r[2]  || '').trim(),
+                            nomSegment:     String(r[3]  || '').trim(),
+                            fournisseur:    String(r[4]  || '').trim(),
+                            extOrigineCode: String(r[5]  || '').trim(),
+                            typeExtA:       String(r[6]  || '').trim(),
+                            extOrigineType: String(r[7]  || '').trim(),
+                            extCibleCode:   String(r[8]  || '').trim(),
+                            typeExtB:       String(r[9]  || '').trim(),
+                            extCibleType:   String(r[10] || '').trim(),
+                            nbFo:           String(r[11] || '').trim(),
+                            longueur:       String(r[12] || '').trim(),
+                            mux:            String(r[13] || '').trim(),
+                            couleur:        String(r[14] || '').trim(),
+                            status:         0
+                        }))
+                        .filter(r => r.nomSegment || r.liaison);
+
+                    const existing = JSON.parse(localStorage.getItem('collect2030_segments') || '[]')
+                        .filter(s => s.topoId !== topoId);
+                    const merged = [...existing, ...parsed];
+                    localStorage.setItem('collect2030_segments', JSON.stringify(merged));
+                    allSegments.length = 0;
+                    merged.filter(s => s.topoId === topoId).forEach(s => allSegments.push(s));
+                    importedSegments = parsed.length;
+                }
+
+                // ── Mettre à jour la topologie ───────────────────────────
+                const topos = getTopologies();
+                const topo  = topos.find(t => t.id === topoId);
+                if (topo) {
+                    topo.lot         = lot;
+                    topo.hasLiaisons = importedLiaisons > 0;
+                    topo.hasSegments = importedSegments > 0;
+                    saveTopologies(topos);
+                }
+
+                closeImportModal();
+                updateDashboard();
+
+                alert(`✅ Import réussi !\n\n📁 ${filename}\n📍 Topologie : ${topo ? topo.name : topoId}\n📦 LOT : ${lot}\n🔗 ${importedLiaisons} liaison(s)\n📋 ${importedSegments} segment(s)`);
+
+                // Rafraîchir modal si ouvert
+                const modal = document.getElementById('dataViewModal');
+                if (modal && modal.classList.contains('active')) {
+                    renderLiaisonsTable();
+                    renderSegmentsTable();
+                }
+
+            } catch (err) {
+                alert('❌ Erreur lors de la lecture : ' + err.message);
+                console.error(err);
+            }
+        }
+        // ── FIN IMPORT ──────────────────────────────────────────────────
+
+        // Charger liaisons et segments depuis localStorage
+        const savedLiaisons = localStorage.getItem('collect2030_liaisons');
+        if (savedLiaisons) {
+            const parsed = JSON.parse(savedLiaisons);
+            liaisons.length = 0;
+            parsed.forEach(l => liaisons.push(l));
+        }
+
+        const savedSegments = localStorage.getItem('collect2030_segments');
+        if (savedSegments) {
+            const parsed = JSON.parse(savedSegments);
+            allSegments.length = 0;
+            parsed.forEach(s => allSegments.push(s));
+        }
+        // ── FIN IMPORT ──────────────────────────────────────────────────
+
+        function viderTopologie() {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            if (!confirm(`⚠️ Vider la topologie "${topoName}" ?\n\nCette action supprimera toutes les liaisons et tous les segments associés.\nElle est irréversible.`)) return;
+
+            const topos = getTopologies();
+            const topo  = topos.find(t => t.name === topoName);
+            if (!topo) return;
+
+            // Vider liaisons
+            const allL = JSON.parse(localStorage.getItem('collect2030_liaisons') || '[]').filter(l => l.topoId !== topo.id);
+            localStorage.setItem('collect2030_liaisons', JSON.stringify(allL));
+            liaisons.length = 0;
+
+            // Vider segments
+            const allS = JSON.parse(localStorage.getItem('collect2030_segments') || '[]').filter(s => s.topoId !== topo.id);
+            localStorage.setItem('collect2030_segments', JSON.stringify(allS));
+            allSegments.length = 0;
+
+            // Mettre à jour le statut de la topo
+            topo.hasLiaisons = false;
+            topo.hasSegments = false;
+            topo.lot         = null;
+            saveTopologies(topos);
+
+            // Masquer les boutons et onglets
+            
+            document.getElementById('allSegmentsBtn').style.display = 'none';
+            document.getElementById('viderTopoBtn').style.display = 'none';
+            document.getElementById('pageTabsBar').style.display = 'none';
+
+            renderPhases();
+            updateDashboard();
+
+            alert(`✅ Topologie "${topoName}" vidée.\nLiaisons et segments supprimés.`);
+        }
+
+        // Fonction de déconnexion
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('collect2030_session');
+                window.location.href = 'login.html';
+            }
+        }
+
+    </script>
+</body>
+</html>
