@@ -779,10 +779,10 @@
         </div>
 
         <!-- Stats -->
-        <div class="stats-grid" id="statsGrid" style="margin-bottom:0.5rem;"></div>
+        <div class="stats-grid" id="statsGrid" style="margin-bottom:0.75rem;"></div>
 
         <!-- Navigation onglets (visible seulement si topo sélectionnée) -->
-        <div id="pageTabsBar" style="display:none; border-bottom:2px solid var(--color-border); margin-bottom:0.75rem;">
+        <div id="pageTabsBar" style="display:none; border-bottom:2px solid var(--color-border); margin-bottom:1rem;">
             <div style="display:flex; gap:0;">
                 <button class="page-tab active" id="tab-dashboard" onclick="switchPageTab('dashboard')">📊 Tableau de bord</button>
                 <button class="page-tab" id="tab-infos"     onclick="switchPageTab('infos')">ℹ️ Informations</button>
@@ -944,7 +944,7 @@
 
         <!-- Onglet : Segments -->
         <!-- Onglet : Segments -->
-        <div id="pageContent-segments" style="display:none; padding-top:0.75rem;">
+        <div id="pageContent-segments" style="display:none; padding-top:0.75rem; padding-left:0.5rem; padding-right:0.5rem;">
             <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
                 <input id="segmentSearch" type="text" placeholder="🔍 Ref Liaison ou Nom Segment..."
                     oninput="filterSegmentsTable()"
@@ -1010,7 +1010,7 @@
 
 
                 <!-- Onglet : Hébergements -->
-        <div id="pageContent-heb" style="display:none;">
+        <div id="pageContent-heb" style="display:none; padding-top:0.75rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <div style="font-size:0.9375rem; color:var(--color-text-secondary);">
                     <strong id="hebCount" style="color:var(--color-text-primary);">0 hébergement</strong> pour cette topologie
