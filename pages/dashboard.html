@@ -924,26 +924,7 @@
                 </table>
             </div>
         </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
-                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Segments</th>
-                        </tr>
-                    </thead>
-                    <tbody id="liaisonsTableBody"></tbody>
-                </table>
-            </div>
-        </div>
 
-        <!-- Onglet : Segments -->
         <!-- Onglet : Segments -->
         <div id="pageContent-segments" style="display:none; padding:0.75rem 1rem;">
             <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
@@ -1723,29 +1704,6 @@
 
         function closeDataViewModal() {
             document.getElementById('dataViewModal').classList.remove('active');
-        }
-
-        function switchTab(tab) {
-            // Reset tous les tabs
-            ['tabInfos', 'tabLiaisons', 'tabSegments'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('active');
-            });
-            ['infosView', 'liaisonsView', 'segmentsView'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
-            });
-
-            if (tab === 'infos') {
-                document.getElementById('tabInfos').classList.add('active');
-                document.getElementById('infosView').style.display = 'block';
-            } else if (tab === 'liaisons') {
-                document.getElementById('tabLiaisons').classList.add('active');
-                document.getElementById('liaisonsView').style.display = 'block';
-            } else {
-                document.getElementById('tabSegments').classList.add('active');
-                document.getElementById('segmentsView').style.display = 'block';
-            }
         }
 
         function renderSegmentsTable() {
