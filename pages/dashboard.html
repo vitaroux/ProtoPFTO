@@ -882,108 +882,119 @@
         </div>
 
         <!-- Onglet : Liaisons -->
-        <div id="pageContent-liaisons" style="display:none; padding:0.75rem 1rem;">
-            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
-                <input id="liaisonSearch" type="text" placeholder="🔍 Rechercher par Ref Liaison..."
-                    oninput="filterLiaisonsTable()"
-                    style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:240px; color:var(--color-text-primary); background:var(--color-surface);">
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-lref" onclick="toggleMs('ms-lref')">Ref Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-lref">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-lref','filterLiaisonsTable')"><input type="checkbox" id="ms-lref-all" checked> Tout sélectionner</div>
-                    </div>
+        <div id="pageContent-liaisons" style="display:none; padding:1rem 1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span id="liaisonsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 liaison</span>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <input id="liaisonSearch" type="text" placeholder="🔍 Rechercher..."
+                        oninput="filterLiaisonsTable()"
+                        style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:200px; color:var(--color-text-primary); background:var(--color-surface);">
+                    <button onclick="resetLiaisonFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-ltype" onclick="toggleMs('ms-ltype')">Type Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-ltype">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-ltype','filterLiaisonsTable')"><input type="checkbox" id="ms-ltype-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-lcode" onclick="toggleMs('ms-lcode')">Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-lcode">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-lcode','filterLiaisonsTable')"><input type="checkbox" id="ms-lcode-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <button onclick="resetLiaisonFilters()" style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
-                <span id="liaisonsCount" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-left:auto;">0 liaison</span>
             </div>
             <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
                 <table style="width:100%;border-collapse:collapse;">
-                    <thead><tr>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
-                        <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Segments</th>
-                        <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">État</th>
-                    </tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Ref Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteOrigineCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type ExtA</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteCibleCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type ExtB</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Segments</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">État</th>
+                        </tr>
+                        <tr id="liaisonFilterRow" style="background:#F1F5F9;">
+                            <td style="padding:0.375rem 0.5rem; border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;">
+                                    <button class="ms-btn" id="ms-btn-lref" onclick="toggleMs('ms-lref')" style="width:100%; min-width:unset; font-size:0.75rem;">Ref Liaison ▾</button>
+                                    <div class="ms-dropdown" id="ms-lref"><div class="ms-option select-all" onclick="toggleMsAll('ms-lref','filterLiaisonsTable')"><input type="checkbox" id="ms-lref-all" checked> Tout</div></div>
+                                </div>
+                            </td>
+                            <td style="padding:0.375rem 0.5rem; border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;">
+                                    <button class="ms-btn" id="ms-btn-ltype" onclick="toggleMs('ms-ltype')" style="width:100%; min-width:unset; font-size:0.75rem;">Type ▾</button>
+                                    <div class="ms-dropdown" id="ms-ltype"><div class="ms-option select-all" onclick="toggleMsAll('ms-ltype','filterLiaisonsTable')"><input type="checkbox" id="ms-ltype-all" checked> Tout</div></div>
+                                </div>
+                            </td>
+                            <td style="padding:0.375rem 0.5rem; border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;">
+                                    <button class="ms-btn" id="ms-btn-lcode" onclick="toggleMs('ms-lcode')" style="width:100%; min-width:unset; font-size:0.75rem;">Liaison ▾</button>
+                                    <div class="ms-dropdown" id="ms-lcode"><div class="ms-option select-all" onclick="toggleMsAll('ms-lcode','filterLiaisonsTable')"><input type="checkbox" id="ms-lcode-all" checked> Tout</div></div>
+                                </div>
+                            </td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                        </tr>
+                    </thead>
                     <tbody id="liaisonsTableBody"></tbody>
                 </table>
             </div>
         </div>
 
         <!-- Onglet : Segments -->
-        <div id="pageContent-segments" style="display:none; padding:0.75rem 1rem;">
-            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.75rem;">
-                <input id="segmentSearch" type="text" placeholder="🔍 Ref Liaison ou Nom Segment..."
-                    oninput="filterSegmentsTable()"
-                    style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:260px; color:var(--color-text-primary); background:var(--color-surface);">
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-sref" onclick="toggleMs('ms-sref')">Ref Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-sref">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sref','filterSegmentsTable')"><input type="checkbox" id="ms-sref-all" checked> Tout sélectionner</div>
-                    </div>
+        <div id="pageContent-segments" style="display:none; padding:1rem 1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span id="segmentsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 segment</span>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <input id="segmentSearch" type="text" placeholder="🔍 Ref Liaison ou Nom Segment..."
+                        oninput="filterSegmentsTable()"
+                        style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; width:240px; color:var(--color-text-primary); background:var(--color-surface);">
+                    <button onclick="resetSegmentFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-stype" onclick="toggleMs('ms-stype')">Type Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-stype">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-stype','filterSegmentsTable')"><input type="checkbox" id="ms-stype-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-sliaison" onclick="toggleMs('ms-sliaison')">Liaison <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-sliaison">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sliaison','filterSegmentsTable')"><input type="checkbox" id="ms-sliaison-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-sfourn" onclick="toggleMs('ms-sfourn')">Fournisseur <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-sfourn">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-sfourn','filterSegmentsTable')"><input type="checkbox" id="ms-sfourn-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <div class="ms-wrapper">
-                    <button class="ms-btn" id="ms-btn-smux" onclick="toggleMs('ms-smux')">Mux <span>▾</span></button>
-                    <div class="ms-dropdown" id="ms-smux">
-                        <div class="ms-option select-all" onclick="toggleMsAll('ms-smux','filterSegmentsTable')"><input type="checkbox" id="ms-smux-all" checked> Tout sélectionner</div>
-                    </div>
-                </div>
-                <button onclick="resetSegmentFilters()" style="padding:0.4rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
-                <span id="segmentsCount" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-left:auto;">0 segment</span>
             </div>
             <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Ref Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Liaison</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Nom Segment</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Fournisseur</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineCode</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtA</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteOrigineType</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleCode</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Type ExtB</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">ExtremiteCibleType</th>
-                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Nb FO</th>
-                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Longueur (ml)</th>
-                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Mux</th>
-                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1.5px solid #D1D5DB;background:#F8FAFC;">Couleur</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Ref Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Liaison</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Nom Segment</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Fournisseur</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteOrigineCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type ExtA</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteOrigineType</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteCibleCode</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Type ExtB</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">ExtremiteCibleType</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Nb FO</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Longueur (ml)</th>
+                            <th style="padding:0.625rem 1rem;text-align:center;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Mux</th>
+                            <th style="padding:0.625rem 1rem;text-align:left;font-size:0.6875rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">Couleur</th>
+                        </tr>
+                        <tr style="background:#F1F5F9;">
+                            <td style="padding:0.375rem 0.5rem;border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;"><button class="ms-btn" id="ms-btn-sref" onclick="toggleMs('ms-sref')" style="width:100%;min-width:unset;font-size:0.75rem;">Ref ▾</button><div class="ms-dropdown" id="ms-sref"><div class="ms-option select-all" onclick="toggleMsAll('ms-sref','filterSegmentsTable')"><input type="checkbox" id="ms-sref-all" checked> Tout</div></div></div>
+                            </td>
+                            <td style="padding:0.375rem 0.5rem;border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;"><button class="ms-btn" id="ms-btn-stype" onclick="toggleMs('ms-stype')" style="width:100%;min-width:unset;font-size:0.75rem;">Type ▾</button><div class="ms-dropdown" id="ms-stype"><div class="ms-option select-all" onclick="toggleMsAll('ms-stype','filterSegmentsTable')"><input type="checkbox" id="ms-stype-all" checked> Tout</div></div></div>
+                            </td>
+                            <td style="padding:0.375rem 0.5rem;border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;"><button class="ms-btn" id="ms-btn-sliaison" onclick="toggleMs('ms-sliaison')" style="width:100%;min-width:unset;font-size:0.75rem;">Liaison ▾</button><div class="ms-dropdown" id="ms-sliaison"><div class="ms-option select-all" onclick="toggleMsAll('ms-sliaison','filterSegmentsTable')"><input type="checkbox" id="ms-sliaison-all" checked> Tout</div></div></div>
+                            </td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="padding:0.375rem 0.5rem;border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;"><button class="ms-btn" id="ms-btn-sfourn" onclick="toggleMs('ms-sfourn')" style="width:100%;min-width:unset;font-size:0.75rem;">Fourn. ▾</button><div class="ms-dropdown" id="ms-sfourn"><div class="ms-option select-all" onclick="toggleMsAll('ms-sfourn','filterSegmentsTable')"><input type="checkbox" id="ms-sfourn-all" checked> Tout</div></div></div>
+                            </td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
+                            <td style="padding:0.375rem 0.5rem;border-bottom:1.5px solid #D1D5DB;">
+                                <div class="ms-wrapper" style="width:100%;"><button class="ms-btn" id="ms-btn-smux" onclick="toggleMs('ms-smux')" style="width:100%;min-width:unset;font-size:0.75rem;">Mux ▾</button><div class="ms-dropdown" id="ms-smux"><div class="ms-option select-all" onclick="toggleMsAll('ms-smux','filterSegmentsTable')"><input type="checkbox" id="ms-smux-all" checked> Tout</div></div></div>
+                            </td>
+                            <td style="border-bottom:1.5px solid #D1D5DB;"></td>
                         </tr>
                     </thead>
                     <tbody id="segmentsTableBody"></tbody>
@@ -991,13 +1002,10 @@
             </div>
         </div>
 
-
-                <!-- Onglet : Hébergements -->
-        <div id="pageContent-heb" style="display:none; padding:0.75rem 1rem;">
+        <!-- Onglet : Hébergements -->
+        <div id="pageContent-heb" style="display:none; padding:1rem 1.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                <div style="font-size:0.9375rem; color:var(--color-text-secondary);">
-                    <strong id="hebCount" style="color:var(--color-text-primary);">0 hébergement</strong> pour cette topologie
-                </div>
+                <strong id="hebCount" style="font-size:0.875rem; color:var(--color-text-primary);">0 hébergement</strong>
                 <button id="hebSaveBtn" class="btn btn-primary" style="display:none;" onclick="saveHebergements()">💾 Enregistrer les modifications</button>
             </div>
             <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
@@ -1656,10 +1664,8 @@
             const phaseSelect = document.getElementById('infoPhaseSelect');
             if (phaseSelect) {
                 phaseSelect.innerHTML = '<option value="">— Sélectionner une phase —</option>' +
-                    allPhases.map(p => `<option value="${p.key}" ${topo.phase === p.key ? 'selected' : ''}>${p.letter} — ${p.label}</option>`).join('');
-                const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
-                const currentPhase = allPhases.find(p => p.key === topo.phase);
-                phaseSelect.style.color = currentPhase ? (phaseColors[topo.phase] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-secondary)';
+                    allPhases.map(p => `<option value="${p.key}" ${topo.phase === p.key ? 'selected' : ''}>${p.label}</option>`).join('');
+                phaseSelect.style.color = 'var(--color-text-primary)';
             }
 
             // Section CDP — visible seulement pour le BE
@@ -1700,10 +1706,8 @@
                 { key: 'migration', letter: 'D', label: 'Migration' }
             ];
             const allPhases = phases.length > 0 ? phases : defaultPhases;
-            const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
-            const currentPhase = allPhases.find(p => p.key === phaseKey);
             const sel = document.getElementById('infoPhaseSelect');
-            if (sel) sel.style.color = currentPhase ? (phaseColors[phaseKey] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-primary)';
+            if (sel) sel.style.color = 'var(--color-text-primary)';
 
             // Mettre à jour le tableau de bord
             updateDashboard();
