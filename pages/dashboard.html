@@ -793,39 +793,35 @@
         </div>
 
         <!-- Onglet : Tableau de bord -->
-        <div id="pageContent-dashboard">
-            <div class="main-grid">
-                <div class="phases-container" id="phasesContainer"></div>
-                <div class="summary-panel">
-                    <div class="summary-card">
-                        <div class="summary-title">Avancement global</div>
-                        <div class="chart-container"><canvas id="progressChart"></canvas></div>
+        <div id="pageContent-dashboard" style="padding:0.75rem 1rem;">
+            <div id="dashboardEmpty" style="display:none; padding:3rem; text-align:center; color:var(--color-text-tertiary);">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">📊</div>
+                <div style="font-weight:600; color:var(--color-text-secondary);">Sélectionnez une topologie pour voir le tableau de bord</div>
+            </div>
+            <div id="dashboardContent">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; margin-bottom:1.25rem;">
+                    <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1rem 1.25rem;">
+                        <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Liaisons</div>
+                        <div id="db-liaisons" style="font-size:1.75rem; font-weight:700; color:var(--color-text-primary);">0</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-title">Progression par phase</div>
-                        <div class="progress-rings">
-                            <div class="progress-ring-item etude">
-                                <div class="progress-ring-label">Étude</div>
-                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-etude" style="width:0%"></div></div>
-                                <div class="progress-ring-value" id="ring-etude-val">0%</div>
-                            </div>
-                            <div class="progress-ring-item travaux">
-                                <div class="progress-ring-label">Travaux</div>
-                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-travaux" style="width:0%"></div></div>
-                                <div class="progress-ring-value" id="ring-travaux-val">0%</div>
-                            </div>
-                            <div class="progress-ring-item cloture">
-                                <div class="progress-ring-label">Clôture</div>
-                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-cloture" style="width:0%"></div></div>
-                                <div class="progress-ring-value" id="ring-cloture-val">0%</div>
-                            </div>
-                            <div class="progress-ring-item migration">
-                                <div class="progress-ring-label">Migration</div>
-                                <div class="progress-ring-bar"><div class="progress-ring-fill" id="ring-migration" style="width:0%"></div></div>
-                                <div class="progress-ring-value" id="ring-migration-val">0%</div>
-                            </div>
-                        </div>
+                    <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1rem 1.25rem;">
+                        <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Segments</div>
+                        <div id="db-segments" style="font-size:1.75rem; font-weight:700; color:var(--color-text-primary);">0</div>
                     </div>
+                    <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1rem 1.25rem;">
+                        <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Hébergements</div>
+                        <div id="db-hebs" style="font-size:1.75rem; font-weight:700; color:var(--color-text-primary);">0</div>
+                    </div>
+                    <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1rem 1.25rem;">
+                        <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Phase</div>
+                        <div id="db-phase" style="font-size:1rem; font-weight:700; color:var(--color-primary);">—</div>
+                    </div>
+                </div>
+
+                <!-- Répartition des statuts segments -->
+                <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem;">
+                    <div style="font-size:0.8125rem; font-weight:700; color:var(--color-text-primary); margin-bottom:1rem;">Répartition des segments par statut</div>
+                    <div id="db-statuts" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
                 </div>
             </div>
         </div>
@@ -842,7 +838,12 @@
                     <div id="infoTopoLot" style="font-size:1rem; font-weight:700; color:var(--color-text-primary);">—</div>
                 </div>
                 <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem; grid-column:1/-1;">
-                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.875rem;">Statut des données</div>
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.75rem;">Phase de la topologie</div>
+                    <select id="infoPhaseSelect" onchange="saveTopoPhase(this.value)"
+                        style="width:100%; padding:0.625rem 0.875rem; border:1.5px solid var(--color-border); border-radius:8px; font-family:inherit; font-size:0.9375rem; font-weight:600; background:var(--color-surface); color:var(--color-text-primary); cursor:pointer;">
+                        <option value="">— Sélectionner une phase —</option>
+                    </select>
+                </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                         <div style="background:var(--color-bg); border:1.5px solid var(--color-border); border-radius:8px; padding:0.875rem; display:flex; align-items:center; gap:0.75rem;">
                             <div style="font-size:1.25rem;">🔗</div>
@@ -1630,17 +1631,29 @@
             const segmentsEl = document.getElementById('infoHasSegments');
             if (topo.hasLiaisons) {
                 liaisonsEl.textContent = '✓ Importées';
-                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#34D399;';
+                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#059669;';
             } else {
                 liaisonsEl.textContent = '✗ Aucune liaison';
-                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#F87171;';
+                liaisonsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#DC2626;';
             }
             if (topo.hasSegments) {
                 segmentsEl.textContent = '✓ Importés';
-                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#34D399;';
+                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#059669;';
             } else {
                 segmentsEl.textContent = '✗ Aucun segment';
-                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#F87171;';
+                segmentsEl.style.cssText = 'font-size:0.75rem;font-weight:600;color:#DC2626;';
+            }
+
+            // Phase select — phases configurées par l'Admin
+            const phases = loadPhases ? loadPhases() : JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const phaseSelect = document.getElementById('infoPhaseSelect');
+            if (phaseSelect) {
+                phaseSelect.innerHTML = '<option value="">— Sélectionner une phase —</option>' +
+                    phases.map(p => `<option value="${p.key}" ${topo.phase === p.key ? 'selected' : ''} style="font-weight:600;">${p.letter} — ${p.label}</option>`).join('');
+                // Colorer le select selon la phase
+                const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
+                const currentPhase = phases.find(p => p.key === topo.phase);
+                phaseSelect.style.color = currentPhase ? (phaseColors[topo.phase] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-primary)';
             }
 
             // Section CDP — visible seulement pour le BE
@@ -1650,16 +1663,10 @@
 
             if (user && user.role === 'be') {
                 cdpSection.style.display = 'block';
-
-                // CDP actuel
                 const users = JSON.parse(localStorage.getItem('collect2030_users') || '[]');
                 const cdpUser = users.find(u => u.email === topo.cdpEmail);
                 document.getElementById('infoCdpCurrent').textContent = cdpUser ? cdpUser.name : 'Non affecté';
-
-                // Avertissement si pas de LOT
                 document.getElementById('infoCdpWarning').style.display = !topo.lot ? 'block' : 'none';
-
-                // Remplir la liste des CDP
                 const cdps = users.filter(u => u.role === 'cp' && u.status === 'actif');
                 const select = document.getElementById('infoCdpSelect');
                 select.innerHTML = '<option value="">Sélectionner un CDP</option>' +
@@ -1668,6 +1675,25 @@
             } else {
                 cdpSection.style.display = 'none';
             }
+        }
+
+        function saveTopoPhase(phaseKey) {
+            const topoName = document.getElementById('topoFilterLabel').textContent;
+            const topos = getTopologies();
+            const topo  = topos.find(t => t.name === topoName);
+            if (!topo) return;
+            topo.phase = phaseKey;
+            saveTopologies(topos);
+
+            // Mettre à jour la couleur du select
+            const phases = loadPhases ? loadPhases() : JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
+            const currentPhase = phases.find(p => p.key === phaseKey);
+            const sel = document.getElementById('infoPhaseSelect');
+            if (sel) sel.style.color = currentPhase ? (phaseColors[phaseKey] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-primary)';
+
+            // Mettre à jour le tableau de bord
+            updateDashboard();
         }
 
         function saveAffectationFromModal() {
@@ -1900,94 +1926,72 @@
         }
 
         function updateDashboard() {
-            // Stats selon rôle
             const session = localStorage.getItem('collect2030_session');
             const user = session ? JSON.parse(session) : { role: 'cp' };
             renderStats(user.role, user);
 
-            if (allSegments.length === 0) return;
+            // Tableau de bord simplifié
+            const topoName = document.getElementById('topoFilterLabel')?.textContent || '';
+            const topo = getTopologies().find(t => t.name === topoName);
 
-            const etats = loadEtats();
-            const statusCounts = {};
-            etats.forEach(e => statusCounts[e.id] = 0);
-            allSegments.forEach(seg => {
-                if (statusCounts[seg.status] !== undefined) statusCounts[seg.status]++;
-            });
+            const dbLiaisons = document.getElementById('db-liaisons');
+            const dbSegments = document.getElementById('db-segments');
+            const dbHebs     = document.getElementById('db-hebs');
+            const dbPhase    = document.getElementById('db-phase');
+            const dbStatuts  = document.getElementById('db-statuts');
 
-            // Mettre à jour chaque jalon dynamiquement
-            etats.forEach(e => {
-                const count = statusCounts[e.id] || 0;
-                const percentage = Math.round((count / allSegments.length) * 100);
-                const jalonEl = document.getElementById(`jalon-${e.id}`);
-                const barEl = document.getElementById(`bar-${e.id}`);
-                if (jalonEl) jalonEl.textContent = count;
-                if (barEl) barEl.style.width = percentage + '%';
-            });
+            if (!dbLiaisons) return;
 
-            // Calcul par phase dynamique
-            const phaseIds = { etude: [], travaux: [], cloture: [], migration: [] };
-            etats.forEach(e => { if (phaseIds[e.phase]) phaseIds[e.phase].push(e.id); });
+            dbLiaisons.textContent = liaisons.length;
+            dbSegments.textContent = allSegments.length;
 
-            const phasePercent = {};
-            Object.entries(phaseIds).forEach(([phase, ids]) => {
-                if (ids.length === 0) { phasePercent[phase] = 0; return; }
-                const total = ids.reduce((sum, id) => sum + (statusCounts[id] || 0), 0);
-                phasePercent[phase] = Math.round((total / allSegments.length) * 100);
-            });
+            // Hébergements de la topo courante
+            const allHebsRaw = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
+            const hebCount = topo ? allHebsRaw.filter(h => h.topoId === topo.id).length : allHebsRaw.length;
+            dbHebs.textContent = hebCount;
 
-            ['etude', 'travaux', 'cloture', 'migration'].forEach(phase => {
-                const el = document.getElementById(`phase-${phase}-percent`);
-                if (el) el.textContent = (phasePercent[phase] || 0) + '%';
-                const ring = document.getElementById(`ring-${phase}`);
-                const ringVal = document.getElementById(`ring-${phase}-val`);
-                if (ring) ring.style.width = (phasePercent[phase] || 0) + '%';
-                if (ringVal) ringVal.textContent = (phasePercent[phase] || 0) + '%';
-            });
+            // Phase de la topo
+            if (topo && topo.phase) {
+                const phases = JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+                const phase = phases.find(p => p.key === topo.phase);
+                const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
+                if (phase) {
+                    dbPhase.textContent = `${phase.letter} — ${phase.label}`;
+                    dbPhase.style.color = phaseColors[topo.phase] || phase.color || 'var(--color-primary)';
+                }
+            } else {
+                if (dbPhase) { dbPhase.textContent = 'Non définie'; dbPhase.style.color = 'var(--color-text-tertiary)'; }
+            }
 
-            const globalProgress = Math.round(Object.values(phasePercent).reduce((a, b) => a + b, 0) / 4);
-            document.getElementById('progressValue').textContent = globalProgress + '%';
+            // Répartition des statuts segments
+            if (dbStatuts && allSegments.length > 0) {
+                const etats = loadEtats ? loadEtats() : JSON.parse(localStorage.getItem('collect2030_etats') || '[]');
+                const counts = {};
+                etats.forEach(e => counts[e.id] = 0);
+                allSegments.forEach(s => { if (counts[s.status] !== undefined) counts[s.status]++; });
 
-            updateChart(phasePercent.etude || 0, phasePercent.travaux || 0, phasePercent.cloture || 0, phasePercent.migration || 0);
+                dbStatuts.innerHTML = etats.filter(e => counts[e.id] > 0).map(e => {
+                    const pct = Math.round((counts[e.id] / allSegments.length) * 100);
+                    return `<div style="display:flex; align-items:center; gap:0.75rem;">
+                        <div style="width:120px; font-size:0.8125rem; color:var(--color-text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${e.name}">${e.name}</div>
+                        <div style="flex:1; background:var(--color-bg); border-radius:4px; height:8px; overflow:hidden;">
+                            <div style="height:100%; background:var(--color-primary); width:${pct}%; border-radius:4px;"></div>
+                        </div>
+                        <div style="width:40px; font-size:0.8125rem; font-weight:600; color:var(--color-text-primary); text-align:right;">${counts[e.id]}</div>
+                        <div style="width:36px; font-size:0.75rem; color:var(--color-text-tertiary); text-align:right;">${pct}%</div>
+                    </div>`;
+                }).join('') || '<div style="color:var(--color-text-tertiary); font-size:0.875rem;">Tous les segments sont au statut "Non démarré"</div>';
+            } else if (dbStatuts) {
+                dbStatuts.innerHTML = '<div style="color:var(--color-text-tertiary); font-size:0.875rem; padding:1rem 0;">Aucun segment importé</div>';
+            }
         }
 
         function initChart() {
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Étude', 'Travaux', 'Clôture', 'Migration'],
-                    datasets: [{
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#8B5CF6'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(26, 26, 46, 0.9)',
-                            padding: 12,
-                            titleFont: { size: 14, weight: '600' },
-                            bodyFont: { size: 13 },
-                            cornerRadius: 8,
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1
-                        }
-                    },
-                    cutout: '70%'
-                }
-            });
+            // Chart désactivé — tableau de bord simplifié
         }
 
-        function updateChart(etude, travaux, cloture, migration) {
-            if (chart) {
-                chart.data.datasets[0].data = [etude, travaux, cloture, migration];
-                chart.update();
-            }
-        }
+        function updateChart() {}
+        function renderPhases() {}
 
         function simulateProgress() {
             const numToAdvance = Math.floor(Math.random() * 15) + 5;
