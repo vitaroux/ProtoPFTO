@@ -1645,15 +1645,21 @@
             }
 
             // Phase select — phases configurées par l'Admin
-            const phases = loadPhases ? loadPhases() : JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const phases = JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const defaultPhases = [
+                { key: 'etude',     letter: 'A', label: 'Étude' },
+                { key: 'travaux',   letter: 'B', label: 'Travaux' },
+                { key: 'cloture',   letter: 'C', label: 'Clôture' },
+                { key: 'migration', letter: 'D', label: 'Migration' }
+            ];
+            const allPhases = phases.length > 0 ? phases : defaultPhases;
             const phaseSelect = document.getElementById('infoPhaseSelect');
             if (phaseSelect) {
                 phaseSelect.innerHTML = '<option value="">— Sélectionner une phase —</option>' +
-                    phases.map(p => `<option value="${p.key}" ${topo.phase === p.key ? 'selected' : ''} style="font-weight:600;">${p.letter} — ${p.label}</option>`).join('');
-                // Colorer le select selon la phase
+                    allPhases.map(p => `<option value="${p.key}" ${topo.phase === p.key ? 'selected' : ''}>${p.letter} — ${p.label}</option>`).join('');
                 const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
-                const currentPhase = phases.find(p => p.key === topo.phase);
-                phaseSelect.style.color = currentPhase ? (phaseColors[topo.phase] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-primary)';
+                const currentPhase = allPhases.find(p => p.key === topo.phase);
+                phaseSelect.style.color = currentPhase ? (phaseColors[topo.phase] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-secondary)';
             }
 
             // Section CDP — visible seulement pour le BE
@@ -1686,9 +1692,16 @@
             saveTopologies(topos);
 
             // Mettre à jour la couleur du select
-            const phases = loadPhases ? loadPhases() : JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const phases = JSON.parse(localStorage.getItem('collect2030_phases') || '[]');
+            const defaultPhases = [
+                { key: 'etude', letter: 'A', label: 'Étude' },
+                { key: 'travaux', letter: 'B', label: 'Travaux' },
+                { key: 'cloture', letter: 'C', label: 'Clôture' },
+                { key: 'migration', letter: 'D', label: 'Migration' }
+            ];
+            const allPhases = phases.length > 0 ? phases : defaultPhases;
             const phaseColors = { etude:'#3B82F6', travaux:'#F59E0B', cloture:'#10B981', migration:'#8B5CF6' };
-            const currentPhase = phases.find(p => p.key === phaseKey);
+            const currentPhase = allPhases.find(p => p.key === phaseKey);
             const sel = document.getElementById('infoPhaseSelect');
             if (sel) sel.style.color = currentPhase ? (phaseColors[phaseKey] || currentPhase.color || 'var(--color-text-primary)') : 'var(--color-text-primary)';
 
