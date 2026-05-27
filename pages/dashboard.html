@@ -51,6 +51,8 @@
             max-width: 1600px;
             margin: 0 auto;
             padding: 0.75rem 1.5rem;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         /* Header */
@@ -829,7 +831,7 @@
         </div>
 
         <!-- Onglet : Informations générales -->
-        <div id="pageContent-infos" style="display:none; padding-top:0.5rem;">
+        <div id="pageContent-infos" style="display:none; padding-top:0.5rem; box-sizing:border-box; width:100%;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; max-width:900px;">
                 <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem;">
                     <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Topologie</div>
@@ -884,7 +886,7 @@
         </div>
 
         <!-- Onglet : Liaisons -->
-        <div id="pageContent-liaisons" style="display:none; padding-top:0.5rem;">
+        <div id="pageContent-liaisons" style="display:none; padding-top:0.5rem; box-sizing:border-box; width:100%;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <span id="liaisonsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 liaison</span>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -894,7 +896,7 @@
                     <button onclick="resetLiaisonFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); width:100%; box-sizing:border-box;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
@@ -941,7 +943,7 @@
         </div>
 
         <!-- Onglet : Segments -->
-        <div id="pageContent-segments" style="display:none; padding-top:0.5rem;">
+        <div id="pageContent-segments" style="display:none; padding-top:0.5rem; box-sizing:border-box; width:100%;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <span id="segmentsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 segment</span>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -951,7 +953,7 @@
                     <button onclick="resetSegmentFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); width:100%; box-sizing:border-box;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
@@ -1005,12 +1007,12 @@
         </div>
 
         <!-- Onglet : Hébergements -->
-        <div id="pageContent-heb" style="display:none; padding-top:0.5rem;">
+        <div id="pageContent-heb" style="display:none; padding-top:0.5rem; box-sizing:border-box; width:100%;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <strong id="hebCount" style="font-size:0.875rem; color:var(--color-text-primary);">0 hébergement</strong>
                 <button id="hebSaveBtn" class="btn btn-primary" style="display:none;" onclick="saveHebergements()">💾 Enregistrer les modifications</button>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); width:100%; box-sizing:border-box;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
