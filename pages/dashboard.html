@@ -717,7 +717,8 @@
 <body>
     
     <!-- Navigation Header -->
-    <div style="position: relative; z-index: 10; background: var(--color-surface); backdrop-filter: blur(20px); border-bottom: 1.5px solid var(--color-border); padding: 0.625rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <div style="position: relative; z-index: 10; background: var(--color-surface); backdrop-filter: blur(20px); border-bottom: 1.5px solid var(--color-border); padding: 0.625rem 1.5rem; display: flex; justify-content: space-between; align-items: center; max-width: 100%;">
+        <div style="max-width: 1600px; width: 100%; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
             <div style="font-size: 1rem; font-weight: 700; color: var(--color-primary); font-family: 'Inter', sans-serif;">Collect 2030</div>
             <div id="piloteNavButton" style="display: none;">
@@ -735,6 +736,7 @@
             <button onclick="logout()" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1.5px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #EF4444; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
                 Déconnexion
             </button>
+        </div>
         </div>
     </div>
     
@@ -793,7 +795,7 @@
         </div>
 
         <!-- Onglet : Tableau de bord -->
-        <div id="pageContent-dashboard">
+        <div id="pageContent-dashboard" style="padding-top:0.5rem;">
             <div id="dashboardEmpty" style="display:none; padding:3rem; text-align:center; color:var(--color-text-tertiary);">
                 <div style="font-size:2rem; margin-bottom:0.75rem;">📊</div>
                 <div style="font-weight:600; color:var(--color-text-secondary);">Sélectionnez une topologie pour voir le tableau de bord</div>
@@ -827,7 +829,7 @@
         </div>
 
         <!-- Onglet : Informations générales -->
-        <div id="pageContent-infos" style="display:none;">
+        <div id="pageContent-infos" style="display:none; padding-top:0.5rem;">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; max-width:900px;">
                 <div style="background:var(--color-surface); border:1.5px solid var(--color-border); border-radius:10px; padding:1.25rem;">
                     <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem;">Topologie</div>
@@ -882,7 +884,7 @@
         </div>
 
         <!-- Onglet : Liaisons -->
-        <div id="pageContent-liaisons" style="display:none;">
+        <div id="pageContent-liaisons" style="display:none; padding-top:0.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <span id="liaisonsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 liaison</span>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -892,7 +894,7 @@
                     <button onclick="resetLiaisonFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
@@ -939,7 +941,7 @@
         </div>
 
         <!-- Onglet : Segments -->
-        <div id="pageContent-segments" style="display:none;">
+        <div id="pageContent-segments" style="display:none; padding-top:0.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <span id="segmentsCount" style="font-size:0.875rem; color:var(--color-text-secondary);">0 segment</span>
                 <div style="display:flex; gap:0.5rem; align-items:center;">
@@ -949,7 +951,7 @@
                     <button onclick="resetSegmentFilters()" style="padding:0.375rem 0.75rem; border:1.5px solid var(--color-border); border-radius:6px; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-secondary); cursor:pointer; font-family:inherit;">✕ Réinitialiser</button>
                 </div>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
@@ -1003,12 +1005,12 @@
         </div>
 
         <!-- Onglet : Hébergements -->
-        <div id="pageContent-heb" style="display:none;">
+        <div id="pageContent-heb" style="display:none; padding-top:0.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                 <strong id="hebCount" style="font-size:0.875rem; color:var(--color-text-primary);">0 hébergement</strong>
                 <button id="hebSaveBtn" class="btn btn-primary" style="display:none;" onclick="saveHebergements()">💾 Enregistrer les modifications</button>
             </div>
-            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface);">
+            <div style="overflow-x:auto; border:1.5px solid var(--color-border); border-radius:10px; background:var(--color-surface); max-width:100%;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
                         <tr>
