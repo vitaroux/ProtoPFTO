@@ -1045,19 +1045,22 @@
     </div>
 
     <!-- Modal Hébergement actions -->
-    <div id="hebModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:flex-start; justify-content:center; padding:2rem; overflow-y:auto;">
-        <div style="background:var(--color-surface); border-radius:12px; max-width:700px; width:100%; box-shadow:0 8px 25px rgba(0,0,0,0.15); margin:auto;">
-            <div style="padding:1.25rem 1.5rem; border-bottom:1.5px solid var(--color-border); display:flex; justify-content:space-between; align-items:center;">
+    <div id="hebModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; align-items:center; justify-content:center; padding:1.5rem; overflow-y:auto;">
+        <div style="background:var(--color-surface); border-radius:12px; max-width:780px; width:100%; box-shadow:0 8px 25px rgba(0,0,0,0.15); display:flex; flex-direction:column; max-height:90vh;">
+            <!-- Header -->
+            <div style="padding:1.25rem 1.5rem; border-bottom:1.5px solid var(--color-border); display:flex; justify-content:space-between; align-items:flex-start; flex-shrink:0;">
                 <div>
-                    <h3 style="font-size:1rem; font-weight:700;">Actions hébergement</h3>
-                    <p id="hebModalTitle" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-top:0.125rem;">—</p>
+                    <h3 style="font-size:1.0625rem; font-weight:700; color:var(--color-text-primary);">Suivi hébergement</h3>
+                    <p id="hebModalTitle" style="font-size:0.8125rem; color:var(--color-text-secondary); margin-top:0.25rem; font-family:'Courier New',monospace;">—</p>
                 </div>
                 <button onclick="closeHebModal()" class="close-btn">×</button>
             </div>
-            <div id="hebModalBody" style="padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:0.75rem;"></div>
-            <div style="padding:1.25rem 1.5rem; border-top:1.5px solid var(--color-border); display:flex; justify-content:flex-end; gap:0.5rem;">
+            <!-- Body scrollable -->
+            <div id="hebModalBody" style="padding:1.25rem 1.5rem; overflow-y:auto; flex:1;"></div>
+            <!-- Footer -->
+            <div style="padding:1rem 1.5rem; border-top:1.5px solid var(--color-border); display:flex; justify-content:flex-end; gap:0.5rem; flex-shrink:0;">
                 <button onclick="closeHebModal()" class="btn btn-secondary">Annuler</button>
-                <button onclick="saveHebActions()" class="btn btn-primary">💾 Enregistrer</button>
+                <button onclick="saveHebActions()" class="btn btn-primary">Enregistrer</button>
             </div>
         </div>
     </div>
@@ -2080,33 +2083,66 @@
         }
 
         // ── MODAL HÉBERGEMENT ACTIONS ────────────────────────────────────
-        const HEB_ACTIONS = [
-            { id: 'dateMAD',         label: 'Date MAD par Orange',                        type: 'date' },
-            { id: 'mailOrangeAnnB',  label: 'Mail envoyé vers Orange pour prise RDV Annexe B', type: 'oui_non' },
-            { id: 'dateVisiteB',     label: 'Date de visite retenue (Annexe B)',           type: 'date' },
-            { id: 'visiteRealisee',  label: 'Visite réalisée',                             type: 'oui_non' },
-            { id: 'annexeABSignee',  label: 'Annexe A & B signée',                        type: 'oui_non' },
-            { id: 'dateDepPFTO1',    label: 'Date dépôse PFTO (Annexe A&B)',              type: 'date' },
-            { id: 'dteHepoc',        label: 'DTE - HEPOC déposée',                        type: 'oui_non' },
-            { id: 'dateDepPFTO2',    label: 'Date dépôse PFTO (DTE)',                     type: 'date' },
-            { id: 'cmdMaterielle',   label: 'Commande matérielle',                         type: 'oui_non' },
-            { id: 'dateReception',   label: 'Date de réception',                           type: 'date' },
-            { id: 'installEquip',    label: 'Installation équipements',                   type: 'oui_non' },
-            { id: 'mailVeritas',     label: 'Mail envoyé pour prise RDV Veritas',         type: 'oui_non' },
-            { id: 'dateVisiteVeritas',label: 'Date de visite retenue (Veritas)',           type: 'date' },
-            { id: 'consuelVeritas',  label: 'Consuel VERITAS réalisé',                    type: 'oui_non' },
-            { id: 'consuelValide',   label: 'Consuel validé',                              type: 'oui_non' },
-            { id: 'dateDepPFTO3',    label: 'Date dépôse PFTO (Consuel)',                 type: 'date' },
-            { id: 'mailOrangeAnnC',  label: 'Mail envoyé vers Orange pour prise RDV Annexe C', type: 'oui_non' },
-            { id: 'dateVisiteC',     label: 'Date de visite retenue (Annexe C)',           type: 'date' },
-            { id: 'visiteAnnC',      label: 'Visite réalisée pour Annexe C',               type: 'oui_non' },
-            { id: 'annexeCSignee',   label: 'Annexe C signée',                             type: 'oui_non' },
-            { id: 'dateDepPFTO4',    label: 'Date dépôse PFTO (Annexe C)',                type: 'date' },
-            { id: 'dtdHepoc',        label: 'DTD - HEPOC déposée',                        type: 'oui_non' },
-            { id: 'dateDepPFTO5',    label: 'Date dépôse PFTO (DTD)',                     type: 'date' },
+        const HEB_SECTIONS = [
+            {
+                title: 'Mise à disposition',
+                rows: [
+                    { id: 'dateMAD', label: 'Date MAD par Orange', type: 'date' }
+                ]
+            },
+            {
+                title: 'Annexe B',
+                rows: [
+                    { id: 'mailOrangeAnnB',  label: 'Mail envoyé vers Orange pour prise RDV', type: 'oui_non' },
+                    { id: 'dateVisiteB',     label: 'Date de visite retenue',                  type: 'date' },
+                    { id: 'visiteRealisee',  label: 'Visite réalisée',                         type: 'oui_non' },
+                    { id: 'annexeABSignee',  label: 'Annexe A & B signée',                     type: 'oui_non' },
+                    { id: 'dateDepPFTO1',    label: 'Date dépôse PFTO',                        type: 'date' },
+                ]
+            },
+            {
+                title: 'DTE / HEPOC',
+                rows: [
+                    { id: 'dteHepoc',       label: 'DTE - HEPOC déposée',    type: 'oui_non' },
+                    { id: 'dateDepPFTO2',   label: 'Date dépôse PFTO',        type: 'date' },
+                    { id: 'cmdMaterielle',  label: 'Commande matérielle',      type: 'oui_non' },
+                    { id: 'dateReception',  label: 'Date de réception',        type: 'date' },
+                    { id: 'installEquip',   label: 'Installation équipements', type: 'oui_non' },
+                ]
+            },
+            {
+                title: 'Consuel Veritas',
+                rows: [
+                    { id: 'mailVeritas',      label: 'Mail envoyé pour prise RDV', type: 'oui_non' },
+                    { id: 'dateVisiteVeritas',label: 'Date de visite retenue',      type: 'date' },
+                    { id: 'consuelVeritas',   label: 'Consuel VERITAS réalisé',     type: 'oui_non' },
+                    { id: 'consuelValide',    label: 'Consuel validé',              type: 'oui_non' },
+                    { id: 'dateDepPFTO3',     label: 'Date dépôse PFTO',            type: 'date' },
+                ]
+            },
+            {
+                title: 'Annexe C',
+                rows: [
+                    { id: 'mailOrangeAnnC',  label: 'Mail envoyé vers Orange pour prise RDV', type: 'oui_non' },
+                    { id: 'dateVisiteC',     label: 'Date de visite retenue',                  type: 'date' },
+                    { id: 'visiteAnnC',      label: 'Visite réalisée',                         type: 'oui_non' },
+                    { id: 'annexeCSignee',   label: 'Annexe C signée',                         type: 'oui_non' },
+                    { id: 'dateDepPFTO4',    label: 'Date dépôse PFTO',                        type: 'date' },
+                ]
+            },
+            {
+                title: 'DTD / HEPOC',
+                rows: [
+                    { id: 'dtdHepoc',     label: 'DTD - HEPOC déposée', type: 'oui_non' },
+                    { id: 'dateDepPFTO5', label: 'Date dépôse PFTO',     type: 'date' },
+                ]
+            }
         ];
 
-        let currentHebIdx = null; // index dans collect2030_hebergements pour la topo courante
+        // Garder HEB_ACTIONS pour compatibilité
+        const HEB_ACTIONS = HEB_SECTIONS.flatMap(s => s.rows);
+
+        let currentHebIdx = null;
 
         function openHebModal(topoId, hebId42c) {
             const all  = JSON.parse(localStorage.getItem('collect2030_hebergements') || '[]');
@@ -2115,33 +2151,36 @@
             if (idx === -1) return;
             currentHebIdx = { topoId, id42c: hebId42c };
 
-            const heb = hebs[idx];
+            const heb     = hebs[idx];
             const actions = heb.actions || {};
 
-            document.getElementById('hebModalTitle').textContent = `${heb.topoName} — ${heb.id42c || 'Sans ID'} (LOT ${heb.lot||'?'})`;
+            document.getElementById('hebModalTitle').textContent = `${heb.topoName}  ·  ${heb.id42c || '—'}  ·  LOT ${heb.lot || '?'}`;
+
+            const inputStyle = `padding:0.4rem 0.625rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.875rem; background:var(--color-surface); color:var(--color-text-primary);`;
 
             const body = document.getElementById('hebModalBody');
-            body.innerHTML = HEB_ACTIONS.map(a => {
-                const val = actions[a.id] || '';
-                if (a.type === 'oui_non') {
-                    return `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.625rem 0; border-bottom:1px solid var(--color-border);">
-                        <label style="font-size:0.875rem; color:var(--color-text-primary); flex:1;">${a.label}</label>
-                        <select data-action="${a.id}" style="padding:0.3rem 0.5rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-primary); min-width:100px;">
-                            <option value="">—</option>
-                            <option value="OUI" ${val==='OUI'?'selected':''}>OUI</option>
-                            <option value="NON" ${val==='NON'?'selected':''}>NON</option>
-                        </select>
-                    </div>`;
-                } else {
-                    return `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.625rem 0; border-bottom:1px solid var(--color-border);">
-                        <label style="font-size:0.875rem; color:var(--color-text-secondary); flex:1; font-style:italic;">${a.label}</label>
-                        <input type="date" data-action="${a.id}" value="${val}"
-                            style="padding:0.3rem 0.5rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); color:var(--color-text-primary);">
-                    </div>`;
-                }
-            }).join('');
+            body.innerHTML = HEB_SECTIONS.map(section => `
+                <div style="margin-bottom:1.25rem;">
+                    <div style="font-size:0.6875rem; font-weight:700; color:var(--color-text-tertiary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.625rem; padding-bottom:0.375rem; border-bottom:1px solid var(--color-border);">${section.title}</div>
+                    <div style="display:flex; flex-direction:column; gap:0;">
+                        ${section.rows.map((a, i) => {
+                            const val = actions[a.id] || '';
+                            const input = a.type === 'oui_non'
+                                ? `<select data-action="${a.id}" style="${inputStyle} min-width:110px;">
+                                        <option value="">—</option>
+                                        <option value="OUI" ${val==='OUI'?'selected':''}>OUI</option>
+                                        <option value="NON" ${val==='NON'?'selected':''}>NON</option>
+                                   </select>`
+                                : `<input type="date" data-action="${a.id}" value="${val}" style="${inputStyle}">`;
+                            const isLast = i === section.rows.length - 1;
+                            return `
+                            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; ${isLast ? '' : 'border-bottom:1px solid #F1F5F9;'}">
+                                <span style="font-size:0.875rem; color:var(--color-text-primary);">${a.label}</span>
+                                ${input}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`).join('');
 
             document.getElementById('hebModal').style.display = 'flex';
         }
