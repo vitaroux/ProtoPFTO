@@ -1356,15 +1356,25 @@
                 return;
             }
 
+        // États de liaison — paramétrables par l'Admin
+        const DEFAULT_ETATS_LIAISON = [
+            { value: 'Non démarré', color: '#94A3B8' },
+            { value: 'En cours',    color: '#D97706' },
+            { value: 'Mesurer',     color: '#3B82F6' },
+            { value: 'Validé',      color: '#059669' }
+        ];
+
+        function getEtatsLiaison() {
+            const saved = localStorage.getItem('collect2030_etats_liaison');
+            return saved ? JSON.parse(saved) : DEFAULT_ETATS_LIAISON;
+        }
+
             tbody.innerHTML = filtered.map(l => {
                 const realIdx = liaisons.indexOf(l);
-                const etatColors = {
-                    'Non démarré': 'color:#94A3B8;',
-                    'En cours':    'color:#D97706;',
-                    'Mesurer':     'color:#3B82F6;',
-                    'Validé':      'color:#059669;'
-                };
-                const etatStyle = etatColors[l.etat || 'Non démarré'] || '';
+                const etatsL  = getEtatsLiaison();
+                const current = l.etat || etatsL[0]?.value || '';
+                const currentEtat = etatsL.find(e => e.value === current);
+                const etatColor = currentEtat ? currentEtat.color : '#94A3B8';
                 return `
                 <tr onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background=''">
                     <td style="${TDS}">${l.refLiaison||'—'}</td>
@@ -1375,13 +1385,10 @@
                     <td style="${TD}">${badge(l.extCibleCode)}</td>
                     <td style="${TD}">${badge(l.typeB)}</td>
                     <td style="${TD} text-align:center; font-weight:700;">${l.count??'—'}</td>
-                    <td style="${TD}">
+                    <td style="${TD} white-space:nowrap;">
                         <select onchange="updateLiaisonEtat(${realIdx}, this.value)"
-                            style="padding:0.25rem 0.5rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); cursor:pointer; ${etatStyle} font-weight:600;">
-                            <option value="Non démarré" ${(l.etat||'Non démarré')==='Non démarré'?'selected':''}>Non démarré</option>
-                            <option value="En cours"    ${l.etat==='En cours'?'selected':''}>En cours</option>
-                            <option value="Mesurer"     ${l.etat==='Mesurer'?'selected':''}>Mesurer</option>
-                            <option value="Validé"      ${l.etat==='Validé'?'selected':''}>Validé</option>
+                            style="width:120px; padding:0.25rem 0.375rem; border:1.5px solid var(--color-border); border-radius:6px; font-family:inherit; font-size:0.8125rem; background:var(--color-surface); cursor:pointer; color:${etatColor}; font-weight:600;">
+                            ${etatsL.map(e => `<option value="${e.value}" ${e.value===current?'selected':''}>${e.value}</option>`).join('')}
                         </select>
                     </td>
                 </tr>`}).join('');
@@ -1389,19 +1396,13 @@
 
         function updateLiaisonEtat(idx, etat) {
             liaisons[idx].etat = etat;
-            // Persister dans localStorage
             const allL = JSON.parse(localStorage.getItem('collect2030_liaisons') || '[]');
             const l = liaisons[idx];
             const globalIdx = allL.findIndex(x => x.topoId === l.topoId && x.code === l.code);
             if (globalIdx >= 0) allL[globalIdx].etat = etat;
             localStorage.setItem('collect2030_liaisons', JSON.stringify(allL));
-            // Mettre à jour la couleur du select
-            const etatColors = { 'Non démarré':'#94A3B8', 'En cours':'#D97706', 'Mesurer':'#3B82F6', 'Validé':'#059669' };
-            const selects = document.querySelectorAll('#liaisonsTableBody select');
-            // trouver le bon select par index dans le tableau filtré
-            selects.forEach(sel => {
-                if (sel.onchange?.toString().includes(`(${idx},`)) sel.style.color = etatColors[etat] || '#94A3B8';
-            });
+            // Rafraîchir la ligne pour mettre à jour la couleur
+            filterLiaisonsTable();
         }
 
         function resetLiaisonFilters() {
